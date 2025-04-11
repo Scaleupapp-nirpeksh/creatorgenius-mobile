@@ -161,7 +161,9 @@ const IdeaDetailScreen = () => {
         <Card.Title
           title={title}
           titleVariant="titleMedium"
-          left={(props) => <MaterialCommunityIcons {...props} name="lightbulb-on-outline" size={24} color={theme.colors.primary} />}
+          left={(props) => (
+            <MaterialCommunityIcons {...props} name="lightbulb-on-outline" size={24} color={theme.colors.primary} />
+          )}
         />
         <Card.Content>
           {content}
@@ -258,7 +260,9 @@ const IdeaDetailScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.ideaContainer}>
-          <Text variant="headlineMedium" style={styles.ideaTitle}>{idea.title}</Text>
+          <Text variant="headlineMedium" style={styles.ideaTitle}>
+            {idea.title}
+          </Text>
           
           <View style={styles.tagsContainer}>
             {idea.tags.map((tag, index) => (
@@ -276,7 +280,6 @@ const IdeaDetailScreen = () => {
             <Text variant="bodySmall" style={styles.dateText}>
               Saved on {formatDate(idea.savedAt)}
             </Text>
-            
             {idea.platform_suitability && (
               <Chip 
                 style={[
@@ -321,189 +324,192 @@ const IdeaDetailScreen = () => {
           
           {idea.intendedEmotion && (
             <View style={styles.sectionContainer}>
-            <Text variant="titleMedium" style={styles.sectionTitle}>Intended Emotion</Text>
-            <Text variant="bodyMedium" style={styles.emotionText}>{idea.intendedEmotion}</Text>
+              <Text variant="titleMedium" style={styles.sectionTitle}>Intended Emotion</Text>
+              <Text variant="bodyMedium" style={styles.emotionText}>{idea.intendedEmotion}</Text>
+            </View>
+          )}
+          
+          <View style={styles.actionsContainer}>
+            <Button 
+              mode="contained" 
+              onPress={scheduleIdea}
+              icon="calendar-plus"
+              style={styles.actionButton}
+            >
+              Schedule
+            </Button>
+            
+            <Button 
+              mode="outlined" 
+              onPress={navigateToRefine}
+              icon="lightbulb-on-outline"
+              style={styles.actionButton}
+            >
+              Refine
+            </Button>
+          </View>
+        </View>
+        
+        {refinements.length > 0 && (
+          <View style={styles.refinementsContainer}>
+            <Text variant="titleLarge" style={styles.refinementsTitle}>Refinements</Text>
+            {refinements.map(refinement => renderRefinementCard(refinement))}
           </View>
         )}
         
-        <View style={styles.actionsContainer}>
-          <Button 
-            mode="contained" 
-            onPress={scheduleIdea}
-            icon="calendar-plus"
-            style={styles.actionButton}
-          >
-            Schedule
-          </Button>
-          
-          <Button 
-            mode="outlined" 
-            onPress={navigateToRefine}
-            icon="lightbulb-on-outline"
-            style={styles.actionButton}
-          >
-            Refine
-          </Button>
-        </View>
-      </View>
-      
-      {refinements.length > 0 && (
-        <View style={styles.refinementsContainer}>
-          <Text variant="titleLarge" style={styles.refinementsTitle}>Refinements</Text>
-          {refinements.map(refinement => renderRefinementCard(refinement))}
-        </View>
-      )}
-      
-      <View style={styles.footer} />
-    </ScrollView>
-  </SafeAreaView>
-);
+        <View style={styles.footer} />
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-container: {
-  flex: 1,
-},
-header: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  paddingHorizontal: 8,
-  paddingVertical: 8,
-  borderBottomWidth: 1,
-  borderBottomColor: '#f0f0f0',
-},
-headerTitle: {
-  flex: 1,
-  textAlign: 'center',
-  fontWeight: 'bold',
-},
-scrollContainer: {
-  flex: 1,
-},
-scrollContent: {
-  padding: 16,
-},
-ideaContainer: {
-  marginBottom: 24,
-},
-ideaTitle: {
-  fontWeight: 'bold',
-  marginBottom: 12,
-},
-tagsContainer: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginBottom: 16,
-},
-tag: {
-  marginRight: 8,
-  marginBottom: 8,
-},
-tagText: {
-  fontSize: 12,
-},
-infoRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 16,
-},
-dateText: {
-  color: '#6B7280',
-},
-suitabilityChip: {
-  height: 24,
-},
-suitabilityText: {
-  fontSize: 10,
-},
-highSuitability: {
-  backgroundColor: '#DFF7E9', // Light green
-},
-mediumSuitability: {
-  backgroundColor: '#FFF7DD', // Light yellow
-},
-lowSuitability: {
-  backgroundColor: '#FFEBEB', // Light red
-},
-divider: {
-  marginVertical: 16,
-},
-sectionContainer: {
-  marginBottom: 20,
-},
-sectionTitle: {
-  fontWeight: 'bold',
-  marginBottom: 8,
-},
-angleText: {
-  lineHeight: 24,
-},
-hookText: {
-  fontStyle: 'italic',
-},
-emotionText: {
-  // Add any specific styling for emotion text
-},
-structurePoint: {
-  marginBottom: 8,
-},
-actionsContainer: {
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  marginTop: 24,
-  marginBottom: 8,
-},
-actionButton: {
-  flex: 1,
-  marginHorizontal: 8,
-},
-refinementsContainer: {
-  marginBottom: 24,
-},
-refinementsTitle: {
-  fontWeight: 'bold',
-  marginBottom: 16,
-},
-refinementCard: {
-  marginBottom: 16,
-},
-refinementContent: {
-  marginBottom: 16,
-},
-refinementItem: {
-  marginBottom: 12,
-},
-loadingContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-loadingText: {
-  marginTop: 12,
-  color: '#6B7280',
-},
-errorContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 24,
-},
-errorText: {
-  marginTop: 12,
-  marginBottom: 24,
-  textAlign: 'center',
-},
-retryButton: {
-  marginBottom: 12,
-},
-backButton: {
-  marginTop: 12,
-},
-footer: {
-  height: 40,
-},
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+  },
+  ideaContainer: {
+    marginBottom: 24,
+  },
+  ideaTitle: {
+    fontWeight: 'bold',
+    fontSize: 22,
+    marginBottom: 12,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  tag: {
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
+    fontSize: 12,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dateText: {
+    color: '#6B7280',
+  },
+  suitabilityChip: {
+    // Removed fixed height so text is not cut off.
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  suitabilityText: {
+    fontSize: 10,
+  },
+  highSuitability: {
+    backgroundColor: '#DFF7E9', // Light green; you can adjust or remove if you don't want to show "High"
+  },
+  mediumSuitability: {
+    backgroundColor: '#FFF7DD', // Light yellow
+  },
+  lowSuitability: {
+    backgroundColor: '#FFEBEB', // Light red
+  },
+  divider: {
+    marginVertical: 16,
+  },
+  sectionContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  angleText: {
+    lineHeight: 24,
+  },
+  hookText: {
+    fontStyle: 'italic',
+  },
+  emotionText: {
+    // Additional styling for emotion text if needed
+  },
+  structurePoint: {
+    marginBottom: 8,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  refinementsContainer: {
+    marginBottom: 24,
+  },
+  refinementsTitle: {
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  refinementCard: {
+    marginBottom: 16,
+  },
+  refinementContent: {
+    marginBottom: 16,
+  },
+  refinementItem: {
+    marginBottom: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#6B7280',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  errorText: {
+    marginTop: 12,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginBottom: 12,
+  },
+  backButton: {
+    marginTop: 12,
+  },
+  footer: {
+    height: 40,
+  },
 });
 
 export default IdeaDetailScreen;

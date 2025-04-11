@@ -1,6 +1,6 @@
 // src/screens/app/SavedIdeasScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { Text, Card, Searchbar, Chip, Button, useTheme, ActivityIndicator, Divider, IconButton, Menu } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -144,52 +144,50 @@ const SavedIdeasScreen = () => {
     return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  // Render idea card
+  // Render idea card with a custom header to allow multiline title
   const renderIdeaCard = ({ item }: { item: SavedIdea }) => (
     <Card style={styles.card} onPress={() => navigateToDetail(item)}>
-      <Card.Title
-        title={item.title}
-        titleStyle={styles.cardTitle}
-        right={(props) => (
-          <View style={styles.menuContainer}>
-            <Menu
-              visible={menuVisible[item._id] || false}
-              onDismiss={() => toggleMenu(item._id)}
-              anchor={
-                <IconButton
-                  {...props}
-                  icon="dots-vertical"
-                  onPress={() => toggleMenu(item._id)}
-                />
-              }
-            >
-              <Menu.Item 
-                leadingIcon="lightbulb-outline" 
-                onPress={() => {
-                  toggleMenu(item._id);
-                  navigateToRefine(item);
-                }} 
-                title="Refine Idea" 
-              />
-              <Menu.Item 
-                leadingIcon="calendar-plus" 
-                onPress={() => {
-                  toggleMenu(item._id);
-                  scheduleIdea(item);
-                }} 
-                title="Schedule" 
-              />
-              <Divider />
-              <Menu.Item 
-                leadingIcon="delete-outline" 
-                onPress={() => handleDeleteIdea(item._id)}
-                title="Delete" 
-                titleStyle={{ color: theme.colors.error }}
-              />
-            </Menu>
-          </View>
-        )}
-      />
+      {/* Custom Card Header */}
+      <View style={styles.cardHeader}>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+        <IconButton
+          icon="dots-vertical"
+          size={24}
+          onPress={() => toggleMenu(item._id)}
+          style={styles.headerMenuIcon}
+        />
+        <Menu
+          visible={menuVisible[item._id] || false}
+          onDismiss={() => toggleMenu(item._id)}
+          anchor={<View />}
+        >
+          <Menu.Item 
+            leadingIcon="lightbulb-outline" 
+            onPress={() => {
+              toggleMenu(item._id);
+              navigateToRefine(item);
+            }} 
+            title="Refine Idea" 
+          />
+          <Menu.Item 
+            leadingIcon="calendar-plus" 
+            onPress={() => {
+              toggleMenu(item._id);
+              scheduleIdea(item);
+            }} 
+            title="Schedule" 
+          />
+          <Divider />
+          <Menu.Item 
+            leadingIcon="delete-outline" 
+            onPress={() => handleDeleteIdea(item._id)}
+            title="Delete" 
+            titleStyle={{ color: theme.colors.error }}
+          />
+        </Menu>
+      </View>
       <Card.Content>
         <Text variant="bodyMedium" numberOfLines={2} style={styles.angleText}>{item.angle}</Text>
         
@@ -206,7 +204,9 @@ const SavedIdeasScreen = () => {
             </Chip>
           ))}
           {item.tags.length > 3 && (
-            <Text variant="bodySmall" style={styles.moreTagsText}>+{item.tags.length - 3} more</Text>
+            <Text variant="bodySmall" style={styles.moreTagsText}>
+              +{item.tags.length - 3} more
+            </Text>
           )}
         </View>
         
@@ -214,13 +214,12 @@ const SavedIdeasScreen = () => {
           <Text variant="bodySmall" style={styles.dateText}>
             Saved on {formatDate(item.savedAt)}
           </Text>
-          
           {item.platform_suitability && (
             <Chip 
               style={[
                 styles.suitabilityChip,
-                item.platform_suitability === 'High' 
-                  ? styles.highSuitability 
+                item.platform_suitability === 'High'
+                  ? styles.highSuitability
                   : item.platform_suitability === 'Medium'
                     ? styles.mediumSuitability
                     : styles.lowSuitability
@@ -368,9 +367,7 @@ const SavedIdeasScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -403,15 +400,25 @@ const styles = StyleSheet.create({
   clearButton: {
     marginRight: 16,
   },
-  listContent: {
-    padding: 16,
-  },
+  listContent: { padding: 16 },
   card: {
     marginBottom: 16,
     elevation: 2,
   },
+  // Custom header for card
+  cardHeader: {
+    flexDirection: 'column',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
   cardTitle: {
     fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  headerMenuIcon: {
+    alignSelf: 'flex-end',
   },
   angleText: {
     marginBottom: 12,
@@ -441,7 +448,9 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   suitabilityChip: {
-    height: 24,
+    // Removed fixed height so the text is not clipped
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
   suitabilityText: {
     fontSize: 10,
