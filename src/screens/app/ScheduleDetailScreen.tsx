@@ -89,11 +89,9 @@ const ScheduleDetailScreen = () => {
   // Navigate to edit screen
   const navigateToEdit = () => {
     if (!scheduledItem) return;
-    
-    navigation.navigate('EditSchedule', { 
-      item: scheduledItem 
-    });
+    navigation.navigate('EditSchedule', { item: scheduledItem });
   };
+  
   
   // Format date
   const formatDate = (dateString: string): string => {

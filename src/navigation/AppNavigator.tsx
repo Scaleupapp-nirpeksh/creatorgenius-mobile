@@ -13,6 +13,7 @@ import { useTheme, Text } from 'react-native-paper';
 import CalendarScreen from '../screens/app/CalendarScreen';
 import ScheduleDetailScreen from '../screens/app/ScheduleDetailScreen';
 import AddScheduleScreen from '../screens/app/AddScheduleScreen';
+import EditScheduleScreen  from '../screens/app/EditScheduleScreen'
 
 // Placeholder screens
 const PlaceholderScreen = ({ route }: any) => (
@@ -37,6 +38,7 @@ const CalendarNavigator = () => (
     <CalendarStack.Screen name="CalendarView" component={CalendarScreen} />
     <CalendarStack.Screen name="ScheduleDetail" component={ScheduleDetailScreen} />
     <CalendarStack.Screen name="AddSchedule" component={AddScheduleScreen} />
+    <CalendarStack.Screen name="EditSchedule" component={EditScheduleScreen} /> 
     {/* Add EditSchedule component when you create it */}
   </CalendarStack.Navigator>
 );
