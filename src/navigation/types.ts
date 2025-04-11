@@ -1,4 +1,4 @@
-// src/navigation/types.ts (updated)
+// src/navigation/types.ts
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -10,6 +10,7 @@ export type AppTabParamList = {
   SavedItems: undefined;
   Calendar: undefined;
   Profile: undefined;
+  Scripts: undefined;
 };
 
 export type SavedIdeasStackParamList = {
@@ -18,26 +19,23 @@ export type SavedIdeasStackParamList = {
   RefineIdea: { idea: any };
 };
 
-// Update CalendarStackParamList in types.ts
 export type CalendarStackParamList = {
   CalendarView: undefined;
   ScheduleDetail: { id: string };
   AddSchedule: { ideaId?: string; ideaTitle?: string };
-  // Add EditSchedule when you create it
+  EditSchedule: { scheduleId: string };
 };
 
 export type GenerateStackParamList = {
   GenerateIdeas: undefined;
 };
 
-export type GenerateStackParamList = {
-  GenerateIdeas: undefined;
-};
-
-export type AppTabParamList = {
-  Dashboard: undefined;
-  Generate: undefined;
-  SavedItems: undefined;
-  Calendar: undefined;
-  Profile: undefined;
+// Add new navigation types for script-related screens
+export type ScriptStackParamList = {
+  ScriptsList: undefined;
+  CreateScript: undefined;
+  ScriptDetail: { scriptId: string };
+  ScriptPreview: { script: any; ideaId: string };
+  EditScript: { scriptId: string };
+  TransformScript: { scriptId: string };
 };

@@ -40,7 +40,7 @@ export default function DashboardScreen() {
   const [loadingUpcoming, setLoadingUpcoming] = useState(true);
   const [loadingIdeas, setLoadingIdeas] = useState(true);
   const [loadingLocation, setLoadingLocation] = useState(true);
-
+  //const navigateToScripts = () => navigation.navigate('Scripts');
   // Get current date info
   const currentDate = new Date().toLocaleDateString('en-IN', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'

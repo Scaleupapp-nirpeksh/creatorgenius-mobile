@@ -176,4 +176,78 @@ interface ApiResponse<T = any> {
   [key: string]: any;
 }
 
+
+// --- NEW Script Type Definition ---
+// Based on your Script Model
+export interface ScriptSection {
+  section: string;
+  content: string;
+  visualDirection?: string;
+  duration?: string;
+}
+
+export interface Script {
+  _id: string; // Scripts fetched from DB will have an ID
+  userId: string;
+  ideaId?: { // Populated field
+      _id: string;
+      title: string;
+      angle?: string; // Add other idea fields if populated and needed
+  } | string | null; // Could be just ID if not populated
+  originalScriptId?: string | null; // Ref to parent script
+  title: string;
+  platform: string;
+  targetDuration?: string;
+  intro: string;
+  body: ScriptSection[];
+  outro: string;
+  callToAction: string;
+  bRollSuggestions?: string[];
+  tags?: string[];
+  isTransformed?: boolean;
+  createdAt: string; // Timestamps from Mongoose
+  lastModified: string; // Use lastModified (mapped from updatedAt)
+}
+// --- End Script Type Definition ---
+
+// --- NEW API Functions for Scripts ---
+
+// Function to get all scripts for the logged-in user
+export const getUserScriptsApi = async (): Promise<ApiResponse<Script[]>> => {
+  // Token added by interceptor
+  try {
+    const response = await apiClient.get('/scripts'); // GET /api/scripts
+    return response.data; // Expects { success: true, count: N, data: [...] }
+  } catch (error: any) {
+    console.error('API Get User Scripts Error:', error);
+    throw error;
+  }
+};
+
+// Function to get a specific script by ID
+export const getScriptByIdApi = async (scriptId: string): Promise<ApiResponse<Script>> => {
+    // Token added by interceptor
+    try {
+        if (!scriptId) throw new Error("Script ID required");
+        const response = await apiClient.get(`/scripts/${scriptId}`); // GET /api/scripts/:id
+        return response.data; // Expects { success: true, data: { script object } }
+    } catch (error: any) {
+        console.error('API Get Script By ID Error:', error);
+        throw error;
+    }
+};
+
+// Function to delete a script by ID
+export const deleteScriptApi = async (scriptId: string): Promise<ApiResponse<{}>> => {
+    // Token added by interceptor
+    try {
+        if (!scriptId) throw new Error("Script ID required for deletion.");
+        const response = await apiClient.delete(`/scripts/${scriptId}`); // DELETE /api/scripts/:id
+        return response.data; // Expects { success: true, message: '...', data: {} }
+    } catch (error: any) {
+        console.error('API Delete Script Error:', error);
+        throw error;
+    }
+};
+
 export default apiClient;

@@ -10,7 +10,8 @@ import CalendarScreen from '../screens/app/CalendarScreen';
 import ScheduleDetailScreen from '../screens/app/ScheduleDetailScreen';
 import AddScheduleScreen from '../screens/app/AddScheduleScreen';
 import EditScheduleScreen from '../screens/app/EditScheduleScreen';
-import GenerateIdeasScreen from '../screens/app/GenerateIdeasScreen'; // Import the new screen
+import GenerateIdeasScreen from '../screens/app/GenerateIdeasScreen';
+import ScriptNavigator from './ScriptNavigator'; // Import the ScriptNavigator
 import { AppTabParamList } from './types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme, Text } from 'react-native-paper';
@@ -85,7 +86,17 @@ export default function AppNavigator() {
       <Tab.Screen name="Generate" component={GenerateNavigator} />
       <Tab.Screen name="SavedItems" component={SavedIdeasNavigator} />
       <Tab.Screen name="Calendar" component={CalendarNavigator} />
-      <Tab.Screen name="Profile" component={PlaceholderScreen} />
+      {/* Add Scripts tab */}
+      <Tab.Screen 
+        name="Scripts" 
+        component={ScriptNavigator}
+        options={{
+          tabBarIcon: ({ focused, color, size }) => {
+            const iconName = focused ? 'script-text' : 'script-text-outline';
+            return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+          }
+        }}
+      />
     </Tab.Navigator>
   );
 }
