@@ -185,9 +185,13 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     } catch (error: any) {
       console.error("AuthStore: Register action failed:", error);
       const errorMessage = error.message || "Registration failed. Please try again.";
-      set({ authError: errorMessage }); // Set error message for UI
-      await get().logout(); // Ensure clean state on failure
-      set({ isRegistering: false });
+      // Just set the error message and isRegistering state without calling logout
+      set({ 
+        authError: errorMessage,
+        isRegistering: false 
+      });
+      // Remove the logout call to keep user on the registration screen
+      // await get().logout(); <- This line is removed
       return false; // Indicate failure
     }
   },

@@ -151,13 +151,21 @@ export default function LoginScreen({ navigation }: Props) {
 
         {/* Navigate to Register */}
         <Button
-          mode="text"
-          onPress={() => navigation.navigate('Register')}
-          disabled={isLoggingIn}
-          style={styles.subtleButton}
-        >
-          {"Don't have an account? Sign Up"}
-        </Button>
+            mode="text"
+            onPress={() => {
+                console.log("Navigate to Register button pressed");
+                console.log("Auth state before navigation:", useAuthStore.getState());
+                navigation.navigate('Register');
+                // Check again after to see if something changed
+                setTimeout(() => {
+                  console.log("Auth state after navigation:", useAuthStore.getState());
+                }, 100);
+            }}
+            disabled={isLoggingIn}
+            style={styles.subtleButton}
+          >
+            {"Don't have an account? Sign Up"}
+          </Button>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
