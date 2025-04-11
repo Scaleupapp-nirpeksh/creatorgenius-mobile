@@ -1,10 +1,10 @@
 // src/screens/app/DashboardScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Text, Button, Card, useTheme, Avatar, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../store/authStore';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getUpcomingScheduledContent, getRecentIdeas, ScheduledContent, SavedIdea } from '../../services/dashboardService';
 import * as Location from 'expo-location'; // Add this package via: npm install expo-location
@@ -77,37 +77,47 @@ export default function DashboardScreen() {
     })();
   }, []);
 
-  // --- Fetch Upcoming Content ---
-  useEffect(() => {
-    const fetchUpcomingContent = async () => {
-      try {
-        const response = await getUpcomingScheduledContent();
-        setUpcomingContent(response.data || []);
-      } catch (error) {
-        console.error("Error fetching upcoming content:", error);
-      } finally {
-        setLoadingUpcoming(false);
-      }
-    };
+  // --- Fetch data whenever the screen comes into focus ---
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Dashboard screen in focus - refreshing data");
+      
+      // Fetch upcoming scheduled content
+      const fetchUpcomingContent = async () => {
+        setLoadingUpcoming(true);
+        try {
+          const response = await getUpcomingScheduledContent();
+          setUpcomingContent(response.data || []);
+        } catch (error) {
+          console.error("Error fetching upcoming content:", error);
+        } finally {
+          setLoadingUpcoming(false);
+        }
+      };
 
-    fetchUpcomingContent();
-  }, []);
+      // Fetch recent ideas
+      const fetchRecentIdeas = async () => {
+        setLoadingIdeas(true);
+        try {
+          const response = await getRecentIdeas();
+          setRecentIdeas(response.data || []);
+        } catch (error) {
+          console.error("Error fetching recent ideas:", error);
+        } finally {
+          setLoadingIdeas(false);
+        }
+      };
 
-  // --- Fetch Recent Ideas ---
-  useEffect(() => {
-    const fetchRecentIdeas = async () => {
-      try {
-        const response = await getRecentIdeas();
-        setRecentIdeas(response.data || []);
-      } catch (error) {
-        console.error("Error fetching recent ideas:", error);
-      } finally {
-        setLoadingIdeas(false);
-      }
-    };
-
-    fetchRecentIdeas();
-  }, []);
+      // Run both fetches
+      fetchUpcomingContent();
+      fetchRecentIdeas();
+      
+      // Return cleanup function if needed
+      return () => {
+        // Any cleanup code here
+      };
+    }, []) // Empty dependency array means this runs when the screen focuses
+  );
 
   // --- Handle Logout ---
   const handleLogout = () => {
@@ -141,8 +151,23 @@ export default function DashboardScreen() {
   const navigateToCalendar = () => navigation.navigate('Calendar');
   const navigateToScripts = () => navigation.navigate('Scripts');
   
-  const navigateToScheduledItem = (id: string) => navigation.navigate('Calendar', { screen: 'ScheduleDetail', params: { id } });
-  const navigateToIdea = (id: string) => navigation.navigate('SavedItems', { screen: 'IdeaDetail', params: { id } });
+  const navigateToScheduledItem = (id: string) => {
+    console.log("Navigating to scheduled item with ID:", id);
+    navigation.navigate('Calendar', { 
+      screen: 'ScheduleDetail', 
+      params: { id },
+      initial: false
+    });
+  };
+  
+  const navigateToIdea = (id: string) => {
+    console.log("Navigating to idea with ID:", id);
+    navigation.navigate('SavedItems', { 
+      screen: 'IdeaDetail', 
+      params: { ideaId: id },
+      initial: false
+    });
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>

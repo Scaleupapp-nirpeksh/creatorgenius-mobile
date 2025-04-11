@@ -1,15 +1,31 @@
-// src/navigation/types.ts
+// src/navigation/types.ts (updated)
 export type AuthStackParamList = {
-    Login: undefined; // No params expected for Login screen
-    Register: undefined;
-  };
+  Login: undefined;
+  Register: undefined;
+};
   
-  export type AppTabParamList = {
-    Dashboard: undefined;
-    Generate: undefined; // Placeholder for a central action or screen
-    Calendar: undefined;
-    Profile: undefined;
-    // Add other main tabs here
-  };
-  
-  // Add other ParamLists if using more navigators
+export type AppTabParamList = {
+  Dashboard: undefined;
+  Generate: undefined;
+  SavedItems: undefined;
+  Calendar: undefined;
+  Profile: undefined;
+};
+
+export type SavedIdeasStackParamList = {
+  SavedIdeasList: undefined;
+  IdeaDetail: { ideaId: string };
+  RefineIdea: { idea: any };
+};
+
+// Update CalendarStackParamList in types.ts
+export type CalendarStackParamList = {
+  CalendarView: undefined;
+  ScheduleDetail: { id: string };
+  AddSchedule: { ideaId?: string; ideaTitle?: string };
+  // Add EditSchedule when you create it
+};
+
+export type GenerateStackParamList = {
+  GenerateIdeas: undefined;
+};
