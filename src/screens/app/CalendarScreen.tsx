@@ -1,6 +1,6 @@
 // src/screens/app/CalendarScreen.tsx
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Card, Button, useTheme, ActivityIndicator, Chip, IconButton, FAB, Menu } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -93,15 +93,14 @@ const CalendarScreen = () => {
     
     // Create marks for dates with content
     Object.keys(itemsByDate).forEach(date => {
-      const items = itemsByDate[date];
-      // Use status color of first item for now (we could enhance this)
-      const firstItem = items[0];
+      const itemsForDate = itemsByDate[date];
+      // Use status color of first item for now (you can extend this)
+      const firstItem = itemsForDate[0];
       const color = statusColors[firstItem.status] || theme.colors.primary;
       
       marked[date] = {
         marked: true,
         dotColor: color,
-        // If this is the selected date, also mark it as selected
         ...(date === currentDate && {
           selected: true,
           selectedColor: theme.colors.primaryContainer
@@ -131,7 +130,6 @@ const CalendarScreen = () => {
       return itemDate === date;
     });
     
-    // Also apply status filter if active
     if (statusFilter) {
       setFilteredItems(filtered.filter(item => item.status === statusFilter));
     } else {
@@ -144,10 +142,7 @@ const CalendarScreen = () => {
     const newSelectedDate = day.dateString;
     setSelectedDate(newSelectedDate);
     
-    // Update marked dates
     const newMarkedDates = { ...markedDates };
-    
-    // Remove selection from previous date
     Object.keys(newMarkedDates).forEach(date => {
       if (newMarkedDates[date].selected) {
         newMarkedDates[date] = {
@@ -157,7 +152,6 @@ const CalendarScreen = () => {
       }
     });
     
-    // Mark the new selected date
     newMarkedDates[newSelectedDate] = {
       ...(newMarkedDates[newSelectedDate] || { marked: false }),
       selected: true,
@@ -165,8 +159,6 @@ const CalendarScreen = () => {
     };
     
     setMarkedDates(newMarkedDates);
-    
-    // Filter items for the selected date
     filterItemsByDate(scheduledItems, newSelectedDate);
   };
   
@@ -183,7 +175,6 @@ const CalendarScreen = () => {
         })
       );
     } else {
-      // If no status filter, just filter by date
       filterItemsByDate(scheduledItems, selectedDate);
     }
   };
@@ -266,7 +257,7 @@ const CalendarScreen = () => {
     </Menu>
   );
   
-  // Render scheduled item card
+  // Render scheduled item card using Approach 1: Column layout for header
   const renderScheduledItem = (item: ScheduledContent) => (
     <Card 
       key={item._id} 
@@ -275,7 +266,7 @@ const CalendarScreen = () => {
     >
       <Card.Content>
         <View style={styles.itemHeader}>
-          <Text variant="titleMedium" numberOfLines={1}>
+          <Text variant="titleMedium" numberOfLines={2} style={styles.ideaTitle}>
             {item.ideaId?.title || 'Untitled Content'}
           </Text>
           <Chip 
@@ -351,7 +342,6 @@ const CalendarScreen = () => {
           indicatorColor: theme.colors.primary,
           textDisabledColor: theme.colors.surfaceVariant,
           arrowColor: theme.colors.primary,
-          // ... add more theme properties as needed
         }}
         style={styles.calendar}
       />
@@ -454,19 +444,22 @@ const styles = StyleSheet.create({
   },
   itemsListContent: {
     padding: 16,
-    paddingBottom: 80, // Space for FAB
+    paddingBottom: 80,
   },
   itemCard: {
     marginBottom: 12,
   },
   itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'column',   // Column layout
+    alignItems: 'flex-start',
     marginBottom: 8,
   },
+  ideaTitle: {
+    marginBottom: 4,
+  },
   statusChip: {
-    height: 24,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
   },
   itemDetail: {
     marginBottom: 8,

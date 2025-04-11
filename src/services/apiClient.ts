@@ -27,7 +27,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   // Add a longer timeout for slow connections during testing
-  timeout: 10000, // 10 seconds
+  timeout: 30000, // 30 seconds
 });
 
 // --- Request Interceptor ---

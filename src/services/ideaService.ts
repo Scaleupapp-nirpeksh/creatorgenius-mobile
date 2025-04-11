@@ -21,6 +21,16 @@ export interface IdeaRefinement {
   createdAt: string;
 }
 
+export const saveIdea = async (data: any): Promise<any> => {
+    try {
+      const response = await apiClient.post('/ideas', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error saving idea:', error);
+      throw error;
+    }
+  };
+
 // Get all saved ideas with optional filters
 export const getSavedIdeas = async (filters?: { tag?: string; search?: string }): Promise<{ data: SavedIdea[], count: number }> => {
   try {

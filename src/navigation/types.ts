@@ -29,3 +29,15 @@ export type CalendarStackParamList = {
 export type GenerateStackParamList = {
   GenerateIdeas: undefined;
 };
+
+export type GenerateStackParamList = {
+  GenerateIdeas: undefined;
+};
+
+export type AppTabParamList = {
+  Dashboard: undefined;
+  Generate: undefined;
+  SavedItems: undefined;
+  Calendar: undefined;
+  Profile: undefined;
+};

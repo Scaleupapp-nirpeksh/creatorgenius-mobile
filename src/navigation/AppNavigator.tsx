@@ -1,28 +1,29 @@
-// src/navigation/AppNavigator.tsx (updated to include nested navigators)
+// src/navigation/AppNavigator.tsx
 import React from 'react';
-import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from '../screens/app/DashboardScreen';
 import SavedIdeasScreen from '../screens/app/SavedIdeasScreen';
 import IdeaDetailScreen from '../screens/app/IdeaDetailScreen';
 import RefineIdeaScreen from '../screens/app/RefineIdeaScreen';
-import { AppTabParamList } from './types';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme, Text } from 'react-native-paper';
 import CalendarScreen from '../screens/app/CalendarScreen';
 import ScheduleDetailScreen from '../screens/app/ScheduleDetailScreen';
 import AddScheduleScreen from '../screens/app/AddScheduleScreen';
-import EditScheduleScreen  from '../screens/app/EditScheduleScreen'
+import EditScheduleScreen from '../screens/app/EditScheduleScreen';
+import GenerateIdeasScreen from '../screens/app/GenerateIdeasScreen'; // Import the new screen
+import { AppTabParamList } from './types';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTheme, Text } from 'react-native-paper';
+import { View } from 'react-native';
 
-// Placeholder screens
+// Placeholder for Profile Screen (for example)
 const PlaceholderScreen = ({ route }: any) => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
     <Text variant="titleLarge">{route.name} Screen</Text>
   </View>
 );
 
-// Create stacks for nested navigation
+// SavedIdeas Navigator
 const SavedIdeasStack = createNativeStackNavigator();
 const SavedIdeasNavigator = () => (
   <SavedIdeasStack.Navigator screenOptions={{ headerShown: false }}>
@@ -32,24 +33,26 @@ const SavedIdeasNavigator = () => (
   </SavedIdeasStack.Navigator>
 );
 
+// Calendar Navigator
 const CalendarStack = createNativeStackNavigator();
 const CalendarNavigator = () => (
   <CalendarStack.Navigator screenOptions={{ headerShown: false }}>
     <CalendarStack.Screen name="CalendarView" component={CalendarScreen} />
     <CalendarStack.Screen name="ScheduleDetail" component={ScheduleDetailScreen} />
     <CalendarStack.Screen name="AddSchedule" component={AddScheduleScreen} />
-    <CalendarStack.Screen name="EditSchedule" component={EditScheduleScreen} /> 
-    {/* Add EditSchedule component when you create it */}
+    <CalendarStack.Screen name="EditSchedule" component={EditScheduleScreen} />
   </CalendarStack.Navigator>
 );
 
+// Generate Navigator – updated to use our new GenerateIdeasScreen
 const GenerateStack = createNativeStackNavigator();
 const GenerateNavigator = () => (
   <GenerateStack.Navigator screenOptions={{ headerShown: false }}>
-    <GenerateStack.Screen name="GenerateIdeas" component={PlaceholderScreen} />
+    <GenerateStack.Screen name="GenerateIdeas" component={GenerateIdeasScreen} />
   </GenerateStack.Navigator>
 );
 
+// Bottom Tab Navigator
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
 export default function AppNavigator() {
@@ -61,11 +64,10 @@ export default function AppNavigator() {
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = 'help-circle-outline';
-
           if (route.name === 'Dashboard') {
             iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
           } else if (route.name === 'Generate') {
-             iconName = focused ? 'lightbulb-on' : 'lightbulb-on-outline';
+            iconName = focused ? 'lightbulb-on' : 'lightbulb-on-outline';
           } else if (route.name === 'Calendar') {
             iconName = focused ? 'calendar-month' : 'calendar-month-outline';
           } else if (route.name === 'SavedItems') {
@@ -73,7 +75,6 @@ export default function AppNavigator() {
           } else if (route.name === 'Profile') {
             iconName = focused ? 'account-circle' : 'account-circle-outline';
           }
-
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: theme.colors.primary,
