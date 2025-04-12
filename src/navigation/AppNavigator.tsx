@@ -16,6 +16,7 @@ import { AppTabParamList } from './types';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme, Text } from 'react-native-paper';
 import { View } from 'react-native';
+import TrendsScreen from '../screens/app/TrendsScreen';
 
 // Placeholder for Profile Screen (for example)
 const PlaceholderScreen = ({ route }: any) => (
@@ -86,6 +87,7 @@ export default function AppNavigator() {
       <Tab.Screen name="Generate" component={GenerateNavigator} />
       <Tab.Screen name="SavedItems" component={SavedIdeasNavigator} />
       <Tab.Screen name="Calendar" component={CalendarNavigator} />
+      <Tab.Screen name="Trends" component={TrendsScreen} />
       {/* Add Scripts tab */}
       <Tab.Screen 
         name="Scripts" 

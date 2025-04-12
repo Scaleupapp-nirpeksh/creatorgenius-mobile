@@ -7,10 +7,11 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   Dashboard: undefined;
   Generate: undefined;
-  SavedItems: undefined;
+  Saved: undefined;
   Calendar: undefined;
   Profile: undefined;
   Scripts: undefined;
+  Trends: undefined;
 };
 
 export type SavedIdeasStackParamList = {
@@ -39,3 +40,8 @@ export type ScriptStackParamList = {
   EditScript: { scriptId: string };
   TransformScript: { scriptId: string };
 };
+
+export type TrendsStackParamList = {
+  TrendsQuery: undefined;
+   TrendDetail: { trendId: string }; // Example detail screen
+ };

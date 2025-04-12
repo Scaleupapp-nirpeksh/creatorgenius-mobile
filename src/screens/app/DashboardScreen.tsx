@@ -331,13 +331,13 @@ export default function DashboardScreen() {
           </Card>
 
           {/* Trends Card */}
-          <Card style={styles.card} onPress={navigateToTrends}>
-            <Card.Content style={styles.cardContent}>
-              <MaterialCommunityIcons name="trending-up" size={36} color={theme.colors.primary} />
-              <Text variant="titleMedium" style={styles.cardTitle}>Trend Query</Text>
-              <Text variant="bodySmall" style={styles.cardDescription}>Explore latest trends & news</Text>
-            </Card.Content>
-          </Card>
+          <Card style={styles.card} onPress={navigateToTrends}> // Correct onPress handler
+  <Card.Content style={styles.cardContent}>
+    <MaterialCommunityIcons name="trending-up" size={36} color={theme.colors.primary} />
+    <Text variant="titleMedium" style={styles.cardTitle}>Trend Query</Text>
+    <Text variant="bodySmall" style={styles.cardDescription}>Explore latest trends & news</Text>
+  </Card.Content>
+</Card>
 
           {/* Saved Items Card */}
           <Card style={styles.card} onPress={navigateToSavedItems}>
