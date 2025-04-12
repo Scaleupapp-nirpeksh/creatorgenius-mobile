@@ -1,3 +1,4 @@
+// src/screens/app/LoadingScreen.tsx
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text, useTheme } from 'react-native-paper';

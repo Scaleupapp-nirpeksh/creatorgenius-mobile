@@ -5,7 +5,7 @@ import { Text, Button, useTheme, TextInput, HelperText, IconButton, Menu, Divide
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { getIdeasForScheduling, scheduleItem } from '../../services/calendarService';
+import { getIdeasForScheduling, scheduleItem, SavedIdea } from '../../services/calendarService';
 
 type ParamList = {
   AddSchedule: { ideaId?: string, ideaTitle?: string };
