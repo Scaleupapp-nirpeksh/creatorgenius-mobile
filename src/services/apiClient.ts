@@ -416,5 +416,48 @@ export const deleteMyAccountApi = async (/* data?: DeleteAccountData */): Promis
     }
 };
 
+
+export interface Feedback {
+  _id: string;
+  userId: string;
+  type: 'query' | 'feedback' | 'issue';
+  title: string;
+  description: string;
+  rating?: number;
+  ratingReason?: string;
+  tags?: string[];
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  createdAt: string;
+  updatedAt: string;
+  // Add additional fields as needed
+}
+
+// Get feedback for the logged-in user
+export const getUserFeedbackApi = async (): Promise<ApiResponse<Feedback[]>> => {
+  try {
+    return (await apiClient.get('/feedback')).data;
+  } catch (error: any) {
+    console.error('API Get User Feedback Error:', error);
+    throw error;
+  }
+};
+
+// Create new feedback (or query/issue)
+export const createFeedbackApi = async (feedbackData: {
+  type: string;
+  title: string;
+  description: string;
+  rating?: number;
+  ratingReason?: string;
+  tags?: string[];
+}): Promise<ApiResponse<Feedback>> => {
+  try {
+    return (await apiClient.post('/feedback', feedbackData)).data;
+  } catch (error: any) {
+    console.error('API Create Feedback Error:', error);
+    throw error;
+  }
+};
+
 // --- Default export ---
 export default apiClient;

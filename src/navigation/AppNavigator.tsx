@@ -23,6 +23,7 @@ import SeoInsightDetailScreen from '../screens/app/SeoInsightDetailScreen';
 import { useTheme, Appbar } from 'react-native-paper';
 import { AppTabParamList } from './types';
 import CustomTabBar from '../navigation/CustomTabBar';
+import FeedbackScreen from '../screens/app/FeedbackScreen';
 
 // SEO Navigator
 const SeoStack = createNativeStackNavigator();
@@ -99,7 +100,15 @@ export default function AppNavigator() {
       <Tab.Screen name="Trends" component={TrendsNavigator} />
       <Tab.Screen name="SEO" component={SeoNavigator} />
       <Tab.Screen name="Scripts" component={ScriptNavigator} />
-
+      <Tab.Screen
+  name="Feedback"
+  component={FeedbackScreen}
+  options={{
+    tabBarButton: () => null, // Hide from the main tab bar
+    headerShown: true,
+    headerTitle: 'Feedback',
+  }}
+/>
       {/* Hidden Account Settings Screen */}
       <Tab.Screen
         name="AccountSettings"

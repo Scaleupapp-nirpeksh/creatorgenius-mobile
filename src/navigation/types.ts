@@ -9,12 +9,13 @@ export type AppTabParamList = {
   Generate: undefined;
   SavedItems: undefined;
   Calendar: undefined;
-  Profile: undefined;
-  Scripts: undefined;
   Trends: undefined;
-  SEO: undefined; 
+  SEO: undefined;
+  Scripts: undefined;
   AccountSettings: undefined;
+  Feedback: undefined; // Add this line
 };
+
 
 export type SavedIdeasStackParamList = {
   SavedIdeasList: undefined;

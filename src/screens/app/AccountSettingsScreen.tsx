@@ -353,7 +353,11 @@ const AccountSettingsScreen = () => {
                   
               </Card.Content>
           </Card>
+          <Button mode="outlined" onPress={() => navigation.navigate('Feedback')} style={{ marginTop: 16 }}>
+  View / Submit Feedback
+</Button>
 
+        
           {/* --- Logout Button --- */}
           <Button
               mode="outlined"
