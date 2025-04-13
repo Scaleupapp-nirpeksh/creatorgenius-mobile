@@ -1,7 +1,24 @@
 // src/screens/app/SavedIdeasScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
-import { Text, Card, Searchbar, Chip, Button, useTheme, ActivityIndicator, Divider, IconButton, Menu } from 'react-native-paper';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  RefreshControl,
+  Share,
+} from 'react-native';
+import {
+  Text,
+  Card,
+  Searchbar,
+  Chip,
+  Button,
+  useTheme,
+  ActivityIndicator,
+  Divider,
+  IconButton,
+  Menu,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getSavedIdeas, SavedIdea, deleteIdea } from '../../services/ideaService';
@@ -10,7 +27,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 const SavedIdeasScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
-  
+
   // State
   const [ideas, setIdeas] = useState<SavedIdea[]>([]);
   const [filteredIdeas, setFilteredIdeas] = useState<SavedIdea[]>([]);
@@ -29,32 +46,30 @@ const SavedIdeasScreen = () => {
     }, [])
   );
 
-  // Handle search
+  // Handle search filtering
   useEffect(() => {
-    if (ideas.length === 0) return;
+    if (ideas.length === 0) {
+      setFilteredIdeas([]);
+      return;
+    }
     
     let filtered = [...ideas];
-    
-    // Apply tag filter
     if (selectedTag) {
       filtered = filtered.filter(idea => idea.tags.includes(selectedTag));
     }
-    
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        idea => 
+        idea =>
           idea.title.toLowerCase().includes(query) ||
           idea.angle.toLowerCase().includes(query) ||
-          idea.tags.some(tag => tag.toLowerCase().includes(query))
+          idea.tags.some(tag => tag.toLowerCase().includes(query)),
       );
     }
-    
     setFilteredIdeas(filtered);
   }, [ideas, searchQuery, selectedTag]);
 
-  // Extract unique tags
+  // Extract unique tags for filtering
   useEffect(() => {
     if (ideas.length > 0) {
       const tags = new Set<string>();
@@ -88,7 +103,7 @@ const SavedIdeasScreen = () => {
     fetchIdeas();
   };
 
-  // Handle search
+  // Handle search text changes
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
   };
@@ -98,11 +113,11 @@ const SavedIdeasScreen = () => {
     setSelectedTag(selectedTag === tag ? null : tag);
   };
 
-  // Toggle idea menu
+  // Toggle the idea menu state for a given idea
   const toggleMenu = (ideaId: string) => {
     setMenuVisible(prev => ({
       ...prev,
-      [ideaId]: !prev[ideaId]
+      [ideaId]: !prev[ideaId],
     }));
   };
 
@@ -111,16 +126,16 @@ const SavedIdeasScreen = () => {
     navigation.navigate('IdeaDetail', { ideaId: idea._id });
   };
 
-  // Navigate to refinement screen
+  // Navigate to refine idea screen
   const navigateToRefine = (idea: SavedIdea) => {
     navigation.navigate('RefineIdea', { idea });
   };
 
-  // Schedule an idea
+  // Navigate to schedule screen
   const scheduleIdea = (idea: SavedIdea) => {
-    navigation.navigate('Calendar', { 
-      screen: 'AddSchedule', 
-      params: { ideaId: idea._id, ideaTitle: idea.title } 
+    navigation.navigate('Calendar', {
+      screen: 'AddSchedule',
+      params: { ideaId: idea._id, ideaTitle: idea.title },
     });
   };
 
@@ -128,9 +143,7 @@ const SavedIdeasScreen = () => {
   const handleDeleteIdea = async (ideaId: string) => {
     try {
       await deleteIdea(ideaId);
-      // Remove the idea from the state
       setIdeas(prevIdeas => prevIdeas.filter(idea => idea._id !== ideaId));
-      // Close the menu
       setMenuVisible(prev => ({ ...prev, [ideaId]: false }));
     } catch (err) {
       console.error('Failed to delete idea:', err);
@@ -138,63 +151,107 @@ const SavedIdeasScreen = () => {
     }
   };
 
-  // Format date
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  // Share an idea via the native Share API
+  const handleShareIdea = async (idea: SavedIdea) => {
+    try {
+      const result = await Share.share({
+        title: idea.title,
+        message: `Check out this idea: "${idea.title}"\n\n${idea.angle}`,
+      });
+      if (result.action === Share.sharedAction) {
+        console.log('Idea shared successfully!');
+      }
+    } catch (error) {
+      console.error('Error sharing idea:', error);
+    } finally {
+      setMenuVisible(prev => ({ ...prev, [idea._id]: false }));
+    }
   };
 
-  // Render idea card with a custom header to allow multiline title
+  // Navigate to edit idea screen
+  const navigateToEdit = (idea: SavedIdea) => {
+    navigation.navigate('EditIdea', { ideaId: idea._id });
+  };
+
+  // Format a date string
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  // Render idea card with custom header
   const renderIdeaCard = ({ item }: { item: SavedIdea }) => (
     <Card style={styles.card} onPress={() => navigateToDetail(item)}>
-      {/* Custom Card Header */}
+      {/* Custom Header with embedded Menu anchor */}
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <IconButton
-          icon="dots-vertical"
-          size={24}
-          onPress={() => toggleMenu(item._id)}
-          style={styles.headerMenuIcon}
-        />
+        <View style={styles.titleContainer}>
+          <Text style={styles.cardTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+        </View>
         <Menu
           visible={menuVisible[item._id] || false}
           onDismiss={() => toggleMenu(item._id)}
-          anchor={<View />}
+          anchor={
+            <IconButton
+              icon="dots-vertical"
+              size={20}
+              onPress={() => toggleMenu(item._id)}
+              style={styles.headerMenuIcon}
+              iconColor={theme.colors.onSurfaceVariant}
+            />
+          }
         >
-          <Menu.Item 
-            leadingIcon="lightbulb-outline" 
+          <Menu.Item
+            leadingIcon="lightbulb-outline"
             onPress={() => {
               toggleMenu(item._id);
               navigateToRefine(item);
-            }} 
-            title="Refine Idea" 
+            }}
+            title="Refine Idea"
           />
-          <Menu.Item 
-            leadingIcon="calendar-plus" 
+          <Menu.Item
+            leadingIcon="calendar-plus"
             onPress={() => {
               toggleMenu(item._id);
               scheduleIdea(item);
-            }} 
-            title="Schedule" 
+            }}
+            title="Schedule"
+          />
+          <Menu.Item
+            leadingIcon="share-variant"
+            onPress={() => handleShareIdea(item)}
+            title="Share Idea"
+          />
+          <Menu.Item
+            leadingIcon="pencil-outline"
+            onPress={() => {
+              toggleMenu(item._id);
+              navigateToEdit(item);
+            }}
+            title="Edit Idea"
           />
           <Divider />
-          <Menu.Item 
-            leadingIcon="delete-outline" 
+          <Menu.Item
+            leadingIcon="delete-outline"
             onPress={() => handleDeleteIdea(item._id)}
-            title="Delete" 
+            title="Delete"
             titleStyle={{ color: theme.colors.error }}
           />
         </Menu>
       </View>
       <Card.Content>
-        <Text variant="bodyMedium" numberOfLines={2} style={styles.angleText}>{item.angle}</Text>
-        
+        <Text variant="bodyMedium" numberOfLines={2} style={styles.angleText}>
+          {item.angle}
+        </Text>
         <View style={styles.tagsContainer}>
           {item.tags.slice(0, 3).map((tag, index) => (
-            <Chip 
-              key={index} 
+            <Chip
+              key={index}
               onPress={() => onSelectTag(tag)}
               style={styles.tag}
               textStyle={styles.tagText}
@@ -209,20 +266,19 @@ const SavedIdeasScreen = () => {
             </Text>
           )}
         </View>
-        
         <View style={styles.cardFooter}>
           <Text variant="bodySmall" style={styles.dateText}>
             Saved on {formatDate(item.savedAt)}
           </Text>
           {item.platform_suitability && (
-            <Chip 
+            <Chip
               style={[
                 styles.suitabilityChip,
                 item.platform_suitability === 'High'
                   ? styles.highSuitability
                   : item.platform_suitability === 'Medium'
-                    ? styles.mediumSuitability
-                    : styles.lowSuitability
+                  ? styles.mediumSuitability
+                  : styles.lowSuitability,
               ]}
               textStyle={styles.suitabilityText}
             >
@@ -235,9 +291,11 @@ const SavedIdeasScreen = () => {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: '#F8F9FB' }]}>
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={styles.headerTitle}>Saved Ideas</Text>
+        <Text variant="headlineMedium" style={styles.headerTitle}>
+          Saved Ideas
+        </Text>
         <IconButton
           icon="plus"
           mode="contained"
@@ -245,17 +303,17 @@ const SavedIdeasScreen = () => {
           iconColor={theme.colors.onPrimary}
           size={24}
           onPress={() => navigation.navigate('Generate')}
+          style={styles.addButton}
         />
       </View>
-      
+
       <Searchbar
         placeholder="Search ideas..."
         onChangeText={onChangeSearch}
         value={searchQuery}
         style={styles.searchBar}
       />
-      
-      {/* Tags horizontal scroll */}
+
       {uniqueTags.length > 0 && (
         <View style={styles.tagsScrollContainer}>
           <FlatList
@@ -267,11 +325,13 @@ const SavedIdeasScreen = () => {
                 onPress={() => onSelectTag(item)}
                 style={[
                   styles.filterTag,
-                  selectedTag === item && { backgroundColor: theme.colors.primaryContainer }
+                  selectedTag === item && {
+                    backgroundColor: theme.colors.primaryContainer,
+                  },
                 ]}
                 textStyle={[
                   styles.filterTagText,
-                  selectedTag === item && { color: theme.colors.primary }
+                  selectedTag === item && { color: theme.colors.primary },
                 ]}
                 showSelectedCheck={false}
               >
@@ -294,16 +354,18 @@ const SavedIdeasScreen = () => {
           )}
         </View>
       )}
-      
+
       {error && (
         <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
+          <Text style={[styles.errorText, { color: theme.colors.error }]}>
+            {error}
+          </Text>
           <Button mode="contained" onPress={fetchIdeas} style={styles.retryButton}>
             Retry
           </Button>
         </View>
       )}
-      
+
       {loading && !refreshing ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -311,19 +373,21 @@ const SavedIdeasScreen = () => {
         </View>
       ) : filteredIdeas.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons 
-            name="lightbulb-outline" 
-            size={64} 
-            color={theme.colors.primary} 
+          <MaterialCommunityIcons
+            name="lightbulb-outline"
+            size={64}
+            color={theme.colors.primary}
           />
           {searchQuery || selectedTag ? (
             <>
-              <Text variant="titleMedium" style={styles.emptyTitle}>No matching ideas</Text>
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                No matching ideas
+              </Text>
               <Text variant="bodyMedium" style={styles.emptyText}>
                 Try adjusting your search or filters
               </Text>
-              <Button 
-                mode="outlined" 
+              <Button
+                mode="outlined"
                 onPress={() => {
                   setSearchQuery('');
                   setSelectedTag(null);
@@ -335,12 +399,14 @@ const SavedIdeasScreen = () => {
             </>
           ) : (
             <>
-              <Text variant="titleMedium" style={styles.emptyTitle}>No saved ideas yet</Text>
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                No saved ideas yet
+              </Text>
               <Text variant="bodyMedium" style={styles.emptyText}>
                 Generate new content ideas and save them here for easy access
               </Text>
-              <Button 
-                mode="contained" 
+              <Button
+                mode="contained"
                 onPress={() => navigation.navigate('Generate')}
                 style={styles.emptyButton}
               >
@@ -355,9 +421,7 @@ const SavedIdeasScreen = () => {
           renderItem={renderIdeaCard}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListFooterComponent={<View style={styles.listFooter} />}
           showsVerticalScrollIndicator={false}
         />
@@ -372,142 +436,62 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
   },
-  headerTitle: {
-    fontWeight: 'bold',
-  },
+  headerTitle: { fontWeight: 'bold' },
+  addButton: { marginLeft: 8 },
   searchBar: {
     marginHorizontal: 16,
     marginBottom: 12,
     elevation: 2,
+    borderRadius: 12,
   },
-  tagsScrollContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  tagsScrollContent: {
-    paddingHorizontal: 16,
-  },
-  filterTag: {
-    marginRight: 8,
-  },
-  filterTagText: {
-    fontSize: 12,
-  },
-  clearButton: {
-    marginRight: 16,
-  },
-  listContent: { padding: 16 },
+  tagsScrollContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  tagsScrollContent: { paddingHorizontal: 16 },
+  filterTag: { marginRight: 8, marginVertical: 4, borderRadius: 16 },
+  filterTagText: { fontSize: 12 },
+  clearButton: { marginRight: 16 },
+  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
   card: {
     marginBottom: 16,
+    borderRadius: 12,
+    backgroundColor: '#fff',
     elevation: 2,
   },
-  // Custom header for card
   cardHeader: {
-    flexDirection: 'column',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  cardTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  headerMenuIcon: {
-    alignSelf: 'flex-end',
-  },
-  angleText: {
-    marginBottom: 12,
-  },
-  tagsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    marginBottom: 12,
-  },
-  tag: {
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  tagText: {
-    fontSize: 11,
-  },
-  moreTagsText: {
-    color: '#6B7280',
-  },
-  cardFooter: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    paddingTop: 16,
+    paddingHorizontal: 16,
   },
-  dateText: {
-    color: '#6B7280',
-  },
-  suitabilityChip: {
-    // Removed fixed height so the text is not clipped
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  suitabilityText: {
-    fontSize: 10,
-  },
-  highSuitability: {
-    backgroundColor: '#DFF7E9', // Light green
-  },
-  mediumSuitability: {
-    backgroundColor: '#FFF7DD', // Light yellow
-  },
-  lowSuitability: {
-    backgroundColor: '#FFEBEB', // Light red
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#6B7280',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyTitle: {
-    marginTop: 16,
-    fontWeight: 'bold',
-  },
-  emptyText: {
-    marginTop: 8,
-    color: '#6B7280',
-    textAlign: 'center',
-  },
-  emptyButton: {
-    marginTop: 24,
-  },
-  errorContainer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  errorText: {
-    marginBottom: 16,
-  },
-  retryButton: {
-    alignSelf: 'center',
-  },
-  listFooter: {
-    height: 80,
-  },
-  menuContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  titleContainer: { flex: 1, paddingRight: 8 },
+  cardTitle: { fontWeight: '600', fontSize: 16, color: '#111827' },
+  headerMenuIcon: { marginLeft: 'auto' },
+  angleText: { marginTop: 4, marginBottom: 12, lineHeight: 20, color: '#374151' },
+  tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 },
+  tag: { marginRight: 8, marginBottom: 8, borderRadius: 16 },
+  tagText: { fontSize: 11 },
+  moreTagsText: { color: '#6B7280', marginTop: 4 },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  dateText: { color: '#9CA3AF', fontSize: 12 },
+  suitabilityChip: { borderRadius: 16, paddingHorizontal: 8, paddingVertical: 2 },
+  suitabilityText: { fontSize: 10, color: '#374151', fontWeight: '500' },
+  highSuitability: { backgroundColor: '#D1FAE5' },
+  mediumSuitability: { backgroundColor: '#FEF9C3' },
+  lowSuitability: { backgroundColor: '#FFE4E6' },
+  errorContainer: { padding: 16, alignItems: 'center' },
+  errorText: { marginBottom: 16, textAlign: 'center' },
+  retryButton: { alignSelf: 'center' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  loadingText: { marginTop: 12, color: '#6B7280' },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  emptyTitle: { marginTop: 16, fontWeight: 'bold', fontSize: 18 },
+  emptyText: { marginTop: 8, color: '#6B7280', textAlign: 'center', lineHeight: 20 },
+  emptyButton: { marginTop: 24, borderRadius: 20 },
+  listFooter: { height: 72 },
 });
 
 export default SavedIdeasScreen;

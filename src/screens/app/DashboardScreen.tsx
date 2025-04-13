@@ -1,3 +1,4 @@
+// src/screens/app/DashboardScreen.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { Text, Button, Card, useTheme, Avatar, IconButton, Chip, Surface } from 'react-native-paper';
@@ -7,9 +8,11 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getUpcomingScheduledContent, getRecentIdeas, ScheduledContent, SavedIdea } from '../../services/dashboardService';
 import * as Location from 'expo-location';
-// We'll use a gradient background with a custom component instead of expo-linear-gradient
+import { getCurrentUserApi } from '../../services/apiClient';
 
-// Define a proper type for usage stats
+// -------------------------------
+// Type Definitions
+// -------------------------------
 interface UsageStats {
   ideationsThisMonth?: number;
   refinementsThisMonth?: number;
@@ -27,7 +30,6 @@ interface UsageStats {
   [key: string]: any;
 }
 
-// Update User interface to include usage property with proper type
 interface User {
   _id: string;
   name: string;
@@ -38,7 +40,9 @@ interface User {
   [key: string]: any;
 }
 
-// Custom gradient background component to replace expo-linear-gradient
+// -------------------------------
+// Custom Gradient Background Component
+// -------------------------------
 interface GradientBackgroundProps {
   colors: string[];
   style?: any;
@@ -53,7 +57,10 @@ const GradientBackground: React.FC<GradientBackgroundProps> = ({ colors, style, 
   );
 };
 
-export default function DashboardScreen() {
+// -------------------------------
+// DashboardScreen Component
+// -------------------------------
+function DashboardScreen() {
   const theme = useTheme();
   const user = useAuthStore((state) => state.user) as User | null;
   const logout = useAuthStore((state) => state.logout);
@@ -70,22 +77,25 @@ export default function DashboardScreen() {
 
   // Get current date info
   const currentDate = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 
   // --- Get User Location ---
   useEffect(() => {
     (async () => {
       try {
-        let { status } = await Location.requestForegroundPermissionsAsync();
+        const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setLocation("Location access denied");
           setLoadingLocation(false);
           return;
         }
-        let position = await Location.getCurrentPositionAsync({});
+        const position = await Location.getCurrentPositionAsync({});
         const { latitude, longitude } = position.coords;
-        let geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+        const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
         if (geocode && geocode[0]) {
           const { city, region } = geocode[0];
           setLocation(city || region || "Unknown location");
@@ -101,11 +111,9 @@ export default function DashboardScreen() {
     })();
   }, []);
 
-  // --- Fetch data whenever the screen comes into focus ---
+  // --- Fetch upcoming and recent content on focus ---
   useFocusEffect(
     useCallback(() => {
-      console.log("Dashboard screen in focus - refreshing data");
-      
       const fetchUpcomingContent = async () => {
         setLoadingUpcoming(true);
         try {
@@ -132,7 +140,22 @@ export default function DashboardScreen() {
 
       fetchUpcomingContent();
       fetchRecentIdeas();
-      return () => { /* cleanup if needed */ };
+    }, [])
+  );
+
+  // --- Refresh user usage stats on focus ---
+  useFocusEffect(
+    useCallback(() => {
+      async function refreshUser() {
+        try {
+          const updatedUser = await getCurrentUserApi();
+          // Update the auth store using setUser (ensure your auth store supports this)
+          useAuthStore.getState().setUser(updatedUser);
+        } catch (error) {
+          console.error("Failed to refresh user usage stats:", error);
+        }
+      }
+      refreshUser();
     }, [])
   );
 
@@ -154,7 +177,6 @@ export default function DashboardScreen() {
     return '?';
   };
 
-  // Format date function
   const formatDate = (dateStr: string | undefined): string => {
     if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
@@ -204,80 +226,26 @@ export default function DashboardScreen() {
     navigation.navigate('SavedItems', { screen: 'IdeaDetail', params: { ideaId: id }, initial: false });
   };
 
-  // Statistic cards data - Monthly
+  // --- Statistic Cards Data ---
   const monthlyStatsData = [
-    { 
-      label: "Ideas Generated", 
-      value: user?.usage?.ideationsThisMonth || 0,
-      icon: "lightbulb-on-outline",
-      color: "#f59e0b"
-    },
-    { 
-      label: "Refinements", 
-      value: user?.usage?.refinementsThisMonth || 0,
-      icon: "file-document-edit-outline",
-      color: "#10b981"
-    },
-    { 
-      label: "SEO Reports", 
-      value: user?.usage?.seoReportsThisMonth || 0,
-      icon: "magnify",
-      color: "#3b82f6"
-    },
-    { 
-      label: "Scripts Created", 
-      value: user?.usage?.scriptsGeneratedThisMonth || 0,
-      icon: "script-text-outline",
-      color: "#8b5cf6"
-    },
-    { 
-      label: "Script Transforms", 
-      value: user?.usage?.scriptTransformationsThisMonth || 0,
-      icon: "transfer",
-      color: "#ec4899"
-    },
-    { 
-      label: "Insights Saved", 
-      value: user?.usage?.insightsSavedThisMonth || 0,
-      icon: "bookmark-check-outline",
-      color: "#06b6d4"
-    }
+    { label: "Ideas Generated", value: user?.usage?.ideationsThisMonth || 0, icon: "lightbulb-on-outline", color: "#f59e0b" },
+    { label: "Refinements", value: user?.usage?.refinementsThisMonth || 0, icon: "file-document-edit-outline", color: "#10b981" },
+    { label: "SEO Reports", value: user?.usage?.seoReportsThisMonth || 0, icon: "magnify", color: "#3b82f6" },
+    { label: "Scripts Created", value: user?.usage?.scriptsGeneratedThisMonth || 0, icon: "script-text-outline", color: "#8b5cf6" },
+    { label: "Script Transforms", value: user?.usage?.scriptTransformationsThisMonth || 0, icon: "transfer", color: "#ec4899" },
+    { label: "Insights Saved", value: user?.usage?.insightsSavedThisMonth || 0, icon: "bookmark-check-outline", color: "#06b6d4" }
   ];
 
-  // Statistic cards data - Daily
   const dailyStatsData = [
-    { 
-      label: "Searches Today", 
-      value: user?.usage?.dailySearchCount || 0,
-      icon: "magnify",
-      color: "#3b82f6"
-    },
-    { 
-      label: "SEO Analyses", 
-      value: user?.usage?.dailySeoAnalyses || 0,
-      icon: "chart-line",
-      color: "#10b981"
-    },
-    { 
-      label: "Insights Saved", 
-      value: user?.usage?.dailyInsightsSaved || 0,
-      icon: "bookmark-plus-outline",
-      color: "#8b5cf6"
-    },
-    { 
-      label: "Trend Ideations", 
-      value: user?.usage?.dailyTrendIdeations || 0,
-      icon: "trending-up",
-      color: "#f59e0b"
-    }
+    { label: "Searches Today", value: user?.usage?.dailySearchCount || 0, icon: "magnify", color: "#3b82f6" },
+    { label: "SEO Analyses", value: user?.usage?.dailySeoAnalyses || 0, icon: "chart-line", color: "#10b981" },
+    { label: "Insights Saved", value: user?.usage?.dailyInsightsSaved || 0, icon: "bookmark-plus-outline", color: "#8b5cf6" },
+    { label: "Trend Ideations", value: user?.usage?.dailyTrendIdeations || 0, icon: "trending-up", color: "#f59e0b" }
   ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* --- Header with User Info --- */}
         <Surface style={styles.headerSurface}>
           <View style={styles.header}>
@@ -288,19 +256,14 @@ export default function DashboardScreen() {
                   {user?.name || 'Creator'}
                 </Text>
                 <View style={styles.subscriptionBadgeContainer}>
-                  <View
-                    style={[
-                      styles.subscriptionBadge,
-                      { backgroundColor: subscriptionData.backgroundColor }
-                    ]}
-                  >
+                  <View style={[styles.subscriptionBadge, { backgroundColor: subscriptionData.backgroundColor }]}>
                     <MaterialCommunityIcons 
                       name={subscriptionData.icon} 
                       size={16} 
                       color={subscriptionData.textColor}
                       style={styles.subscriptionIcon} 
                     />
-                    <Text style={[styles.subscriptionText, {color: subscriptionData.textColor}]}>
+                    <Text style={[styles.subscriptionText, { color: subscriptionData.textColor }]}>
                       {subscriptionData.label}
                     </Text>
                   </View>
@@ -310,15 +273,9 @@ export default function DashboardScreen() {
                 {currentDate} • {loadingLocation ? "Locating..." : location}
               </Text>
             </View>
-            
-            {/* Profile Avatar */}
             <View style={styles.avatarContainer}>
               {user?.profilePictureUrl ? (
-                <Avatar.Image 
-                  size={56} 
-                  source={{ uri: user.profilePictureUrl }} 
-                  style={styles.avatar}
-                />
+                <Avatar.Image size={56} source={{ uri: user.profilePictureUrl }} style={styles.avatar} />
               ) : (
                 <Avatar.Text
                   size={56}
@@ -417,11 +374,7 @@ export default function DashboardScreen() {
               <View style={styles.emptyStateContainer}>
                 <MaterialCommunityIcons name="calendar-blank" size={40} color="#D1D5DB" />
                 <Text variant="bodyMedium" style={styles.emptyStateText}>No upcoming scheduled content</Text>
-                <Button 
-                  mode="outlined" 
-                  onPress={navigateToCalendar} 
-                  style={styles.emptyStateButton}
-                >
+                <Button mode="outlined" onPress={navigateToCalendar} style={styles.emptyStateButton}>
                   Plan Your Content
                 </Button>
               </View>
@@ -458,11 +411,7 @@ export default function DashboardScreen() {
                         {idea.angle}
                       </Text>
                     </View>
-                    <IconButton 
-                      icon="chevron-right" 
-                      size={20} 
-                      onPress={() => navigateToIdea(idea._id)}
-                    />
+                    <IconButton icon="chevron-right" size={20} onPress={() => navigateToIdea(idea._id)} />
                   </View>
                 ))}
                 <Button 
@@ -478,11 +427,7 @@ export default function DashboardScreen() {
               <View style={styles.emptyStateContainer}>
                 <MaterialCommunityIcons name="lightbulb-outline" size={40} color="#D1D5DB" />
                 <Text variant="bodyMedium" style={styles.emptyStateText}>No saved ideas yet</Text>
-                <Button 
-                  mode="outlined" 
-                  onPress={navigateToIdeation} 
-                  style={styles.emptyStateButton}
-                >
+                <Button mode="outlined" onPress={navigateToIdeation} style={styles.emptyStateButton}>
                   Generate Ideas
                 </Button>
               </View>
@@ -495,9 +440,9 @@ export default function DashboardScreen() {
           <Text variant="titleLarge" style={styles.sectionTitle}>Your AI Toolkit</Text>
           <View style={styles.toolkitGrid}>
             {/* Ideation Card */}
-            <TouchableOpacity onPress={navigateToIdeation} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToIdeation} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(251,146,60,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(251,146,60,0.1)' }]}>
                   <MaterialCommunityIcons name="lightbulb-on-outline" size={32} color="#f97316" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>AI Ideation</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Generate fresh content ideas</Text>
@@ -506,9 +451,9 @@ export default function DashboardScreen() {
             </TouchableOpacity>
 
             {/* Trends Card */}
-            <TouchableOpacity onPress={navigateToTrends} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToTrends} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(59,130,246,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(59,130,246,0.1)' }]}>
                   <MaterialCommunityIcons name="trending-up" size={32} color="#3b82f6" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>Trend Query</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Explore latest trends & news</Text>
@@ -517,9 +462,9 @@ export default function DashboardScreen() {
             </TouchableOpacity>
 
             {/* Saved Items Card */}
-            <TouchableOpacity onPress={navigateToSavedItems} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToSavedItems} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(139,92,246,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(139,92,246,0.1)' }]}>
                   <MaterialCommunityIcons name="bookmark-multiple-outline" size={32} color="#8b5cf6" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>Saved Items</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Ideas, Insights, Scripts</Text>
@@ -528,9 +473,9 @@ export default function DashboardScreen() {
             </TouchableOpacity>
 
             {/* Calendar Card */}
-            <TouchableOpacity onPress={navigateToCalendar} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToCalendar} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(236,72,153,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(236,72,153,0.1)' }]}>
                   <MaterialCommunityIcons name="calendar-month-outline" size={32} color="#ec4899" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>Content Calendar</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Plan your posting schedule</Text>
@@ -539,9 +484,9 @@ export default function DashboardScreen() {
             </TouchableOpacity>
 
             {/* SEO Card */}
-            <TouchableOpacity onPress={navigateToSEO} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToSEO} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(16,185,129,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
                   <MaterialCommunityIcons name="magnify-scan" size={32} color="#10b981" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>SEO Analyzer</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Optimize for discoverability</Text>
@@ -550,9 +495,9 @@ export default function DashboardScreen() {
             </TouchableOpacity>
 
             {/* Scripts Card */}
-            <TouchableOpacity onPress={navigateToScripts} style={{width: '48%'}}>
+            <TouchableOpacity onPress={navigateToScripts} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
-                <View style={[styles.toolCardContent, {backgroundColor: 'rgba(6,182,212,0.1)'}]}>
+                <View style={[styles.toolCardContent, { backgroundColor: 'rgba(6,182,212,0.1)' }]}>
                   <MaterialCommunityIcons name="script-text-outline" size={32} color="#06b6d4" />
                   <Text variant="titleMedium" style={styles.toolCardTitle}>Script Hub</Text>
                   <Text variant="bodySmall" style={styles.toolCardDescription}>Generate & manage scripts</Text>
@@ -568,7 +513,7 @@ export default function DashboardScreen() {
           onPress={handleLogout}
           style={styles.logoutButton}
           contentStyle={styles.logoutButtonContent}
-          icon={({size, color}) => (
+          icon={({ size, color }) => (
             <MaterialCommunityIcons name="logout" size={size} color={color} />
           )}
           textColor={theme.colors.error}
@@ -580,258 +525,56 @@ export default function DashboardScreen() {
   );
 }
 
-// --- Styles ---
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  headerSurface: {
-    borderRadius: 16,
-    marginBottom: 24,
-    elevation: 2,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  userInfo: {
-    flex: 1,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    flexWrap: 'wrap',
-  },
-  userName: {
-    fontWeight: 'bold',
-    marginRight: 12,
-  },
-  welcomeText: {
-    color: '#6B7280',
-    fontWeight: '500',
-  },
-  dateText: {
-    color: '#6B7280',
-    marginTop: 6,
-  },
-  avatarContainer: {
-    marginLeft: 16,
-  },
-  avatar: {
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: 'white',
-  },
-  subscriptionBadgeContainer: {
-    marginBottom: 4,
-  },
-  subscriptionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    elevation: 2,
-  },
-  subscriptionIcon: {
-    marginRight: 4,
-  },
-  subscriptionText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  sectionContainer: {
-    marginBottom: 24,
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#1F2937',
-  },
-  statsCardsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    width: '48%',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statValue: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    color: '#1F2937',
-  },
-  statLabel: {
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  dailyStatsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  dailyStatCard: {
-    width: '48%',
-    borderRadius: 16,
-    marginBottom: 16,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  dailyStatContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
-  dailyIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  dailyStatInfo: {
-    flex: 1,
-  },
-  dailyStatLabel: {
-    color: '#6B7280',
-    marginBottom: 2,
-    fontSize: 13,
-  },
-  dailyStatValue: {
-    fontWeight: 'bold',
-    color: '#1F2937',
-  },
-  contentCard: {
-    borderRadius: 16,
-    padding: 16,
-    elevation: 2,
-  },
-  calendarItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  dateChip: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 12,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  calendarItemContent: {
-    flex: 1,
-  },
-  platformText: {
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  ideaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  ideaIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  ideaItemContent: {
-    flex: 1,
-  },
-  ideaAngle: {
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  emptyStateContainer: {
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyStateText: {
-    color: '#6B7280',
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  emptyStateButton: {
-    marginTop: 8,
-  },
-  toolkitGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  toolCard: {
-    width: '100%',
-    borderRadius: 16,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 2,
-  },
-  toolCardContent: {
-    padding: 20,
-    alignItems: 'center',
-    height: 140,
-    justifyContent: 'center',
-  },
-  toolCardTitle: {
-    marginTop: 12,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  toolCardDescription: {
-    marginTop: 4,
-    textAlign: 'center',
-    color: '#6B7280',
-    fontSize: 12,
-  },
-  logoutButton: {
-    marginTop: 8,
-    marginBottom: 24,
-    alignSelf: 'center',
-    borderColor: '#EF4444',
-    borderRadius: 30,
-    borderWidth: 1.5,
-    width: '60%',
-  },
-  logoutButtonContent: {
-    paddingVertical: 6,
-  }
+  container: { flex: 1 },
+  scrollContent: { paddingVertical: 16, paddingHorizontal: 16 },
+  headerSurface: { borderRadius: 16, marginBottom: 24, elevation: 2 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  userInfo: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, flexWrap: 'wrap' },
+  userName: { fontWeight: 'bold', marginRight: 12 },
+  welcomeText: { color: '#6B7280', fontWeight: '500' },
+  dateText: { color: '#6B7280', marginTop: 6 },
+  avatarContainer: { marginLeft: 16 },
+  avatar: { elevation: 4, borderWidth: 2, borderColor: 'white' },
+  subscriptionBadgeContainer: { marginBottom: 4 },
+  subscriptionBadge: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, elevation: 2 },
+  subscriptionIcon: { marginRight: 4 },
+  subscriptionText: { fontSize: 12, fontWeight: 'bold' },
+  sectionContainer: { marginBottom: 24 },
+  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontWeight: 'bold', marginBottom: 12, color: '#1F2937' },
+  statsCardsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  statCard: { width: '48%', padding: 16, borderRadius: 16, marginBottom: 16, elevation: 2, alignItems: 'center' },
+  iconContainer: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
+  statValue: { fontWeight: 'bold', fontSize: 24, color: '#1F2937' },
+  statLabel: { color: '#6B7280', textAlign: 'center', marginTop: 4 },
+  dailyStatsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  dailyStatCard: { width: '48%', borderRadius: 16, marginBottom: 16, elevation: 2, overflow: 'hidden' },
+  dailyStatContent: { flexDirection: 'row', alignItems: 'center', padding: 16 },
+  dailyIconContainer: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  dailyStatInfo: { flex: 1 },
+  dailyStatLabel: { color: '#6B7280', marginBottom: 2, fontSize: 13 },
+  dailyStatValue: { fontWeight: 'bold', color: '#1F2937' },
+  contentCard: { borderRadius: 16, padding: 16, elevation: 2 },
+  calendarItem: { flexDirection: 'row', alignItems: 'center', marginVertical: 4, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  dateChip: { backgroundColor: '#f0f0f0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, marginRight: 12, minWidth: 60, alignItems: 'center' },
+  calendarItemContent: { flex: 1 },
+  platformText: { color: '#6B7280', marginTop: 2 },
+  ideaItem: { flexDirection: 'row', alignItems: 'center', marginVertical: 4, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  ideaIconContainer: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  ideaItemContent: { flex: 1 },
+  ideaAngle: { color: '#6B7280', marginTop: 2 },
+  emptyStateContainer: { alignItems: 'center', padding: 24 },
+  emptyStateText: { color: '#6B7280', marginTop: 12, marginBottom: 16 },
+  emptyStateButton: { marginTop: 8 },
+  toolkitGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  toolCard: { width: '100%', borderRadius: 16, marginBottom: 16, overflow: 'hidden', elevation: 2 },
+  toolCardContent: { padding: 20, alignItems: 'center', height: 140, justifyContent: 'center' },
+  toolCardTitle: { marginTop: 12, fontWeight: '600', textAlign: 'center' },
+  toolCardDescription: { marginTop: 4, textAlign: 'center', color: '#6B7280', fontSize: 12 },
+  logoutButton: { marginTop: 8, marginBottom: 24, alignSelf: 'center', borderColor: '#EF4444', borderRadius: 30, borderWidth: 1.5, width: '60%' },
+  logoutButtonContent: { paddingVertical: 6 }
 });
+
+export default DashboardScreen;

@@ -7,7 +7,7 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   Dashboard: undefined;
   Generate: undefined;
-  Saved: undefined;
+  SavedItems: undefined;
   Calendar: undefined;
   Profile: undefined;
   Scripts: undefined;

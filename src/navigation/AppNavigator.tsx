@@ -1,4 +1,4 @@
-// src/navigation/AppNavigator.tsx
+// src/navigation/AppNavigator.tsx - UPDATED
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -17,6 +17,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useTheme, Text } from 'react-native-paper';
 import { View } from 'react-native';
 import TrendsScreen from '../screens/app/TrendsScreen';
+import SavedTrendsScreen from '../screens/app/SavedTrendsScreen'; // Import our new screen
+import TrendIdeationScreen from '../screens/app/TrendIdeationScreen'; // Import our new screen
+import WebViewScreen from '../screens/app/WebViewScreen'; // We'll create this basic screen later
 
 // Placeholder for Profile Screen (for example)
 const PlaceholderScreen = ({ route }: any) => (
@@ -46,12 +49,23 @@ const CalendarNavigator = () => (
   </CalendarStack.Navigator>
 );
 
-// Generate Navigator – updated to use our new GenerateIdeasScreen
+// Generate Navigator
 const GenerateStack = createNativeStackNavigator();
 const GenerateNavigator = () => (
   <GenerateStack.Navigator screenOptions={{ headerShown: false }}>
     <GenerateStack.Screen name="GenerateIdeas" component={GenerateIdeasScreen} />
   </GenerateStack.Navigator>
+);
+
+// Trends Navigator - NEW
+const TrendsStack = createNativeStackNavigator();
+const TrendsNavigator = () => (
+  <TrendsStack.Navigator screenOptions={{ headerShown: false }}>
+    <TrendsStack.Screen name="TrendsQuery" component={TrendsScreen} />
+    <TrendsStack.Screen name="SavedTrends" component={SavedTrendsScreen} />
+    <TrendsStack.Screen name="TrendIdeation" component={TrendIdeationScreen} />
+    <TrendsStack.Screen name="WebView" component={WebViewScreen} />
+  </TrendsStack.Navigator>
 );
 
 // Bottom Tab Navigator
@@ -76,6 +90,8 @@ export default function AppNavigator() {
             iconName = focused ? 'bookmark-multiple' : 'bookmark-multiple-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'account-circle' : 'account-circle-outline';
+          } else if (route.name === 'Trends') {
+            iconName = focused ? 'trending-up' : 'trending-up';
           }
           return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
@@ -87,7 +103,7 @@ export default function AppNavigator() {
       <Tab.Screen name="Generate" component={GenerateNavigator} />
       <Tab.Screen name="SavedItems" component={SavedIdeasNavigator} />
       <Tab.Screen name="Calendar" component={CalendarNavigator} />
-      <Tab.Screen name="Trends" component={TrendsScreen} />
+      <Tab.Screen name="Trends" component={TrendsNavigator} />
       {/* Add Scripts tab */}
       <Tab.Screen 
         name="Scripts" 
