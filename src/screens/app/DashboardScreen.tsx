@@ -10,6 +10,7 @@ import { getUpcomingScheduledContent, getRecentIdeas, ScheduledContent, SavedIde
 import * as Location from 'expo-location';
 import { getCurrentUserApi } from '../../services/apiClient';
 
+
 interface UsageStats {
   ideationsThisMonth?: number;
   refinementsThisMonth?: number;
@@ -262,17 +263,19 @@ function DashboardScreen() {
               </Text>
             </View>
             <View style={styles.avatarContainer}>
-              {user?.profilePictureUrl ? (
-                <Avatar.Image size={56} source={{ uri: user.profilePictureUrl }} style={styles.avatar} />
-              ) : (
-                <Avatar.Text
-                  size={56}
-                  label={getInitials(user?.name)}
-                  style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
-                  labelStyle={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}
-                />
-              )}
-            </View>
+  <TouchableOpacity onPress={() => navigation.navigate('AccountSettings')}>
+    {user?.profilePictureUrl ? (
+      <Avatar.Image size={56} source={{ uri: user.profilePictureUrl }} style={styles.avatar} />
+    ) : (
+      <Avatar.Text
+        size={56}
+        label={getInitials(user?.name)}
+        style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
+        labelStyle={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}
+      />
+    )}
+  </TouchableOpacity>
+</View>
           </View>
         </Surface>
 

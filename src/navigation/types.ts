@@ -12,7 +12,8 @@ export type AppTabParamList = {
   Profile: undefined;
   Scripts: undefined;
   Trends: undefined;
-  SEO: undefined; // Added SEO tab
+  SEO: undefined; 
+  AccountSettings: undefined;
 };
 
 export type SavedIdeasStackParamList = {
@@ -64,3 +65,4 @@ export type SeoStackParamList = {
   SavedSeoInsights: undefined;
   SeoInsightDetail: { insightId: string };
 };
+

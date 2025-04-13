@@ -94,6 +94,8 @@ export interface User {
   email: string;
   role: string;
   subscriptionTier?: string;
+  subscriptionStatus?: string; // Add if not present
+  subscriptionEndDate?: string; // Add if not present
   profilePictureUrl?: string;
   interests?: string[];
   preferences?: { newsSources?: string[]; preferredNewsLanguage?: string; [key: string]: any; };
@@ -351,6 +353,68 @@ export const deleteScriptApi = async (scriptId: string): Promise<ApiResponse<{}>
      } catch (error: any) { console.error('API Delete Script Error:', error); throw error; }
 };
 // Add POST for saveScript, PUT for updateScript etc.
+
+
+
+
+// --- User Profile Management ---
+export interface UpdateUserProfileData {
+    name?: string;
+    profilePictureUrl?: string;
+    interests?: string[];
+    // Ensure preferences structure matches backend/User model
+    preferences?: { newsSources?: string[]; preferredNewsLanguage?: string; };
+}
+
+export const updateUserProfileApi = async (updateData: UpdateUserProfileData): Promise<ApiResponse<User>> => {
+    try {
+        // Backend controller filters allowed fields, no need to filter excessively here
+        console.log('Updating profile with data:', updateData); // Log data being sent
+        const response = await apiClient.put<ApiResponse<User>>('/users/me', updateData);
+        console.log('Update profile response:', response.data); // Log response
+        return response.data;
+    } catch (error: any) {
+        console.error('API Update User Profile Error:', error);
+        throw error; // Re-throw the structured error from the interceptor
+    }
+};
+
+export interface UpdatePasswordData {
+    currentPassword: string;
+    newPassword: string;
+}
+
+export const updatePasswordApi = async (passwordData: UpdatePasswordData): Promise<ApiResponse<{}>> => { // No data expected on success
+    try {
+        console.log('Updating password...'); // Avoid logging passwords themselves
+        const response = await apiClient.put<ApiResponse<{}>>('/users/updatepassword', passwordData);
+        console.log('Update password response:', response.data); // Log response
+        return response.data;
+    } catch (error: any) {
+        console.error('API Update Password Error:', error);
+        // Log specific error message if available
+        if (error && typeof error === 'object' && 'message' in error) {
+             console.error('Password update failed with message:', error.message);
+        }
+        throw error; // Re-throw the structured error from the interceptor
+    }
+};
+
+// Optional: Interface if password confirmation is needed for delete
+// export interface DeleteAccountData { currentPassword: string; }
+
+export const deleteMyAccountApi = async (/* data?: DeleteAccountData */): Promise<ApiResponse<{}>> => { // No data expected on success
+    try {
+        console.log('Attempting account deletion via API...');
+        // If password confirmation added: await apiClient.delete('/users/me', { data })
+        const response = await apiClient.delete<ApiResponse<{}>>('/users/me');
+        console.log('Delete account response:', response.data); // Log response
+        return response.data;
+    } catch (error: any) {
+        console.error('API Delete Account Error:', error);
+        throw error; // Re-throw the structured error from the interceptor
+    }
+};
 
 // --- Default export ---
 export default apiClient;

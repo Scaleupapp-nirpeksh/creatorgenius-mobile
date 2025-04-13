@@ -1,4 +1,4 @@
-// Update to src/navigation/AppNavigator.tsx to add SEO navigator
+// src/navigation/AppNavigator.tsx
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,17 +12,17 @@ import AddScheduleScreen from '../screens/app/AddScheduleScreen';
 import EditScheduleScreen from '../screens/app/EditScheduleScreen';
 import GenerateIdeasScreen from '../screens/app/GenerateIdeasScreen';
 import ScriptNavigator from './ScriptNavigator';
-import SeoAnalysisScreen from '../screens/app/SeoAnalysisScreen'; // Import the new SEO screen
-import { AppTabParamList } from './types';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useTheme, Text } from 'react-native-paper';
-import { View } from 'react-native';
+import SeoAnalysisScreen from '../screens/app/SeoAnalysisScreen';
+import AccountSettingsScreen from '../screens/app/AccountSettingsScreen';
 import TrendsScreen from '../screens/app/TrendsScreen';
 import SavedTrendsScreen from '../screens/app/SavedTrendsScreen';
 import TrendIdeationScreen from '../screens/app/TrendIdeationScreen';
 import WebViewScreen from '../screens/app/WebViewScreen';
 import SavedSeoInsightsScreen from '../screens/app/SavedSeoInsightsScreen';
 import SeoInsightDetailScreen from '../screens/app/SeoInsightDetailScreen';
+import { useTheme, Appbar } from 'react-native-paper';
+import { AppTabParamList } from './types';
+import CustomTabBar from '../navigation/CustomTabBar';
 
 // SEO Navigator
 const SeoStack = createNativeStackNavigator();
@@ -32,13 +32,6 @@ const SeoNavigator = () => (
     <SeoStack.Screen name="SavedSeoInsights" component={SavedSeoInsightsScreen} />
     <SeoStack.Screen name="SeoInsightDetail" component={SeoInsightDetailScreen} />
   </SeoStack.Navigator>
-);
-
-// Placeholder for Profile Screen (for example)
-const PlaceholderScreen = ({ route }: any) => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-    <Text variant="titleLarge">{route.name} Screen</Text>
-  </View>
 );
 
 // SavedIdeas Navigator
@@ -89,47 +82,41 @@ export default function AppNavigator() {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
+      tabBar={props => <CustomTabBar {...props} />}
+      screenOptions={{
         headerShown: false,
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName = 'help-circle-outline';
-          if (route.name === 'Dashboard') {
-            iconName = focused ? 'view-dashboard' : 'view-dashboard-outline';
-          } else if (route.name === 'Generate') {
-            iconName = focused ? 'lightbulb-on' : 'lightbulb-on-outline';
-          } else if (route.name === 'Calendar') {
-            iconName = focused ? 'calendar-month' : 'calendar-month-outline';
-          } else if (route.name === 'SavedItems') {
-            iconName = focused ? 'bookmark-multiple' : 'bookmark-multiple-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'account-circle' : 'account-circle-outline';
-          } else if (route.name === 'Trends') {
-            iconName = focused ? 'trending-up' : 'trending-up';
-          } else if (route.name === 'SEO') {
-            iconName = focused ? 'magnify' : 'magnify';
-          }
-          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-      })}
+        tabBarHideOnKeyboard: true,
+        lazy: true,
+        // The background color can be applied to each screen individually
+        // or via detached style components instead of contentStyle
+      }}
     >
+      {/* Visible Tab Screens */}
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Generate" component={GenerateNavigator} />
       <Tab.Screen name="SavedItems" component={SavedIdeasNavigator} />
       <Tab.Screen name="Calendar" component={CalendarNavigator} />
       <Tab.Screen name="Trends" component={TrendsNavigator} />
       <Tab.Screen name="SEO" component={SeoNavigator} />
-      {/* Add Scripts tab */}
-      <Tab.Screen 
-        name="Scripts" 
-        component={ScriptNavigator}
-        options={{
-          tabBarIcon: ({ focused, color, size }) => {
-            const iconName = focused ? 'script-text' : 'script-text-outline';
-            return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-          }
-        }}
+      <Tab.Screen name="Scripts" component={ScriptNavigator} />
+
+      {/* Hidden Account Settings Screen */}
+      <Tab.Screen
+        name="AccountSettings"
+        component={AccountSettingsScreen}
+        options={({ navigation }) => ({
+          tabBarButton: () => null,
+          headerShown: true,
+          headerTitle: 'Account Settings',
+          headerRight: () => (
+            <Appbar.Action
+              icon="check"
+              onPress={() => navigation.navigate('Dashboard')}
+              color={theme.colors.primary}
+              accessibilityLabel="Done"
+            />
+          ),
+        })}
       />
     </Tab.Navigator>
   );
