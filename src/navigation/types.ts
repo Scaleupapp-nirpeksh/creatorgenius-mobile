@@ -1,4 +1,4 @@
-// src/navigation/types.ts
+// src/navigation/types.ts - Updated with SEO types
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -12,6 +12,7 @@ export type AppTabParamList = {
   Profile: undefined;
   Scripts: undefined;
   Trends: undefined;
+  SEO: undefined; // Added SEO tab
 };
 
 export type SavedIdeasStackParamList = {
@@ -43,5 +44,23 @@ export type ScriptStackParamList = {
 
 export type TrendsStackParamList = {
   TrendsQuery: undefined;
-   TrendDetail: { trendId: string }; // Example detail screen
- };
+  TrendDetail: { trendId: string };
+};
+
+
+export type SeoStackParamList = {
+  SeoAnalysis: {
+    prefillData?: {
+      topic?: string;
+      currentTitle?: string;
+      currentDescription?: string;
+      keywords?: string;
+      contentText?: string;
+      platform?: string;
+    };
+    ideaId?: string;
+    scriptId?: string;
+  };
+  SavedSeoInsights: undefined;
+  SeoInsightDetail: { insightId: string };
+};

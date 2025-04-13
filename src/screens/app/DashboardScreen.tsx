@@ -10,9 +10,6 @@ import { getUpcomingScheduledContent, getRecentIdeas, ScheduledContent, SavedIde
 import * as Location from 'expo-location';
 import { getCurrentUserApi } from '../../services/apiClient';
 
-// -------------------------------
-// Type Definitions
-// -------------------------------
 interface UsageStats {
   ideationsThisMonth?: number;
   refinementsThisMonth?: number;
@@ -40,9 +37,7 @@ interface User {
   [key: string]: any;
 }
 
-// -------------------------------
-// Custom Gradient Background Component
-// -------------------------------
+// Optional: Gradient Background Component (if needed later)
 interface GradientBackgroundProps {
   colors: string[];
   style?: any;
@@ -57,9 +52,6 @@ const GradientBackground: React.FC<GradientBackgroundProps> = ({ colors, style, 
   );
 };
 
-// -------------------------------
-// DashboardScreen Component
-// -------------------------------
 function DashboardScreen() {
   const theme = useTheme();
   const user = useAuthStore((state) => state.user) as User | null;
@@ -111,7 +103,7 @@ function DashboardScreen() {
     })();
   }, []);
 
-  // --- Fetch upcoming and recent content on focus ---
+  // --- Fetch upcoming and recent data on focus ---
   useFocusEffect(
     useCallback(() => {
       const fetchUpcomingContent = async () => {
@@ -149,7 +141,6 @@ function DashboardScreen() {
       async function refreshUser() {
         try {
           const updatedUser = await getCurrentUserApi();
-          // Update the auth store using setUser (ensure your auth store supports this)
           useAuthStore.getState().setUser(updatedUser);
         } catch (error) {
           console.error("Failed to refresh user usage stats:", error);
@@ -166,15 +157,12 @@ function DashboardScreen() {
   };
 
   // --- Helper Functions ---
-  const getInitials = (name: string | undefined) => {
+  const getInitials = (name: string | undefined): string => {
     if (!name) return '?';
     const names = name.trim().split(' ');
-    if (names.length > 1 && names[names.length - 1]) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    } else if (name.length > 0) {
-      return name[0].toUpperCase();
-    }
-    return '?';
+    return names.length > 1 && names[names.length - 1]
+      ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+      : name[0].toUpperCase();
   };
 
   const formatDate = (dateStr: string | undefined): string => {
@@ -257,11 +245,11 @@ function DashboardScreen() {
                 </Text>
                 <View style={styles.subscriptionBadgeContainer}>
                   <View style={[styles.subscriptionBadge, { backgroundColor: subscriptionData.backgroundColor }]}>
-                    <MaterialCommunityIcons 
-                      name={subscriptionData.icon} 
-                      size={16} 
+                    <MaterialCommunityIcons
+                      name={subscriptionData.icon}
+                      size={16}
                       color={subscriptionData.textColor}
-                      style={styles.subscriptionIcon} 
+                      style={styles.subscriptionIcon}
                     />
                     <Text style={[styles.subscriptionText, { color: subscriptionData.textColor }]}>
                       {subscriptionData.label}
@@ -400,10 +388,10 @@ function DashboardScreen() {
               <ActivityIndicator style={{ margin: 20 }} />
             ) : recentIdeas.length > 0 ? (
               <>
-                {recentIdeas.map((idea) => (
+                {recentIdeas.slice(0, 5).map((idea) => (
                   <View key={idea._id} style={styles.ideaItem}>
                     <View style={[styles.ideaIconContainer, { backgroundColor: '#f59e0b20' }]}>
-                      <MaterialCommunityIcons name="lightbulb-outline" size={20} color="#f59e0b" />
+                      <MaterialCommunityIcons name="lightbulb-outline" size={20} color={theme.colors.primary} />
                     </View>
                     <View style={styles.ideaItemContent}>
                       <Text variant="titleSmall" numberOfLines={1}>{idea.title}</Text>
@@ -414,20 +402,22 @@ function DashboardScreen() {
                     <IconButton icon="chevron-right" size={20} onPress={() => navigateToIdea(idea._id)} />
                   </View>
                 ))}
-                <Button 
-                  mode="text" 
-                  onPress={navigateToSavedItems} 
-                  style={{ marginTop: 8 }}
-                  labelStyle={{ color: theme.colors.primary }}
-                >
-                  View All Ideas
-                </Button>
+                {recentIdeas.length > 5 && (
+                  <Button 
+                    mode="text" 
+                    onPress={navigateToSavedItems} 
+                    style={{ marginTop: 8 }}
+                    labelStyle={{ color: theme.colors.primary }}
+                  >
+                    View All Ideas
+                  </Button>
+                )}
               </>
             ) : (
               <View style={styles.emptyStateContainer}>
                 <MaterialCommunityIcons name="lightbulb-outline" size={40} color="#D1D5DB" />
                 <Text variant="bodyMedium" style={styles.emptyStateText}>No saved ideas yet</Text>
-                <Button mode="outlined" onPress={navigateToIdeation} style={styles.emptyStateButton}>
+                <Button mode="contained" onPress={navigateToIdeation} style={styles.emptyStateButton}>
                   Generate Ideas
                 </Button>
               </View>
@@ -483,7 +473,7 @@ function DashboardScreen() {
               </Surface>
             </TouchableOpacity>
 
-            {/* SEO Card */}
+            {/* SEO Analyzer Card */}
             <TouchableOpacity onPress={navigateToSEO} style={{ width: '48%' }}>
               <Surface style={styles.toolCard}>
                 <View style={[styles.toolCardContent, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
@@ -574,7 +564,8 @@ const styles = StyleSheet.create({
   toolCardTitle: { marginTop: 12, fontWeight: '600', textAlign: 'center' },
   toolCardDescription: { marginTop: 4, textAlign: 'center', color: '#6B7280', fontSize: 12 },
   logoutButton: { marginTop: 8, marginBottom: 24, alignSelf: 'center', borderColor: '#EF4444', borderRadius: 30, borderWidth: 1.5, width: '60%' },
-  logoutButtonContent: { paddingVertical: 6 }
+  logoutButtonContent: { paddingVertical: 6 },
+  
 });
 
 export default DashboardScreen;
