@@ -100,15 +100,7 @@ export default function AppNavigator() {
       <Tab.Screen name="Trends" component={TrendsNavigator} />
       <Tab.Screen name="SEO" component={SeoNavigator} />
       <Tab.Screen name="Scripts" component={ScriptNavigator} />
-      <Tab.Screen
-  name="Feedback"
-  component={FeedbackScreen}
-  options={{
-    tabBarButton: () => null, // Hide from the main tab bar
-    headerShown: true,
-    headerTitle: 'Feedback',
-  }}
-/>
+      
       {/* Hidden Account Settings Screen */}
       <Tab.Screen
         name="AccountSettings"

@@ -235,6 +235,7 @@ const SavedIdeasScreen = () => {
             }}
             title="Edit Idea"
           />
+          
           <Divider />
           <Menu.Item
             leadingIcon="delete-outline"

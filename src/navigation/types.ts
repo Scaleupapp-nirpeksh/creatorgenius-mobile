@@ -13,7 +13,7 @@ export type AppTabParamList = {
   SEO: undefined;
   Scripts: undefined;
   AccountSettings: undefined;
-  Feedback: undefined; // Add this line
+ // Feedback: undefined; // Add this line
 };
 
 

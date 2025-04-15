@@ -459,5 +459,32 @@ export const createFeedbackApi = async (feedbackData: {
   }
 };
 
+
+export interface UsageFeature {
+  current: number;
+  limit: number | 'unlimited';
+  remaining: number | 'unlimited';
+}
+
+export interface UsageData {
+  daily: Record<string, UsageFeature>;
+  monthly: Record<string, UsageFeature>;
+  permanent: Record<string, { 
+    limit: number | 'unlimited';
+    current?: number;       // Only if you decide to query DB for actual usage
+    remaining?: number | 'unlimited';
+  }>;
+}
+
+export const getUserUsageApi = async (): Promise<ApiResponse<UsageData>> => {
+  try {
+    const response = await apiClient.get<ApiResponse<UsageData>>('/users/me/usage');
+    return response.data;
+  } catch (error: any) {
+    console.error('API Get User Usage Error:', error);
+    throw error;
+  }
+};
+
 // --- Default export ---
 export default apiClient;
