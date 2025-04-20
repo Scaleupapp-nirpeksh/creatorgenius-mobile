@@ -10,12 +10,17 @@ const AUTH_TOKEN_KEY = 'creatorgenius_authToken'; // Make sure this matches what
 let API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
-  if (Platform.OS === 'android') {
-    API_BASE_URL = 'http://10.0.2.2:5001/api';
-  } else if (Platform.OS === 'ios') {
-    // For iOS simulator, try this special address
-    API_BASE_URL = 'http://192.168.68.109:5001/api';
-  } 
+  // Production fallback if env variable not set
+  API_BASE_URL = 'https://creator-genius-env-2.eba-8xmj6etz.ap-south-1.elasticbeanstalk.com/api';
+  
+  // Development fallbacks
+  if (__DEV__) {
+    if (Platform.OS === 'android') {
+      API_BASE_URL = 'http://10.0.2.2:5001/api';
+    } else if (Platform.OS === 'ios') {
+      API_BASE_URL = 'http://192.168.68.109:5001/api';
+    }
+  }
 }
 
 console.log(`API Base URL: ${API_BASE_URL}`);
