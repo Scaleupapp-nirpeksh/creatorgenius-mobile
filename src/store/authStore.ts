@@ -156,43 +156,51 @@ export const useAuthStore = create<AuthState & AuthActions>((set, get) => ({
     }
   },
 
-  // Action to handle user registration
   register: async (userData: RegisterUserData): Promise<boolean> => {
-    set({ isRegistering: true, authError: null }); // Start loading, clear errors
+    console.log('Starting registration process for:', userData.email);
+    set({ isRegistering: true, authError: null });
+    
     try {
+      console.log('Calling registerUserApi...');
+      const startTime = Date.now();
       const response = await registerUserApi(userData);
+      console.log(`Registration API response received in ${Date.now() - startTime}ms:`, response);
+      
       if (response.success && response.token) {
-        // Save token first
+        console.log('Registration successful, saving token...');
         await get().setToken(response.token);
         
+        console.log('Token saved, fetching user data with delay...');
         // Add a small delay to ensure token is saved
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        // Fetch user data after registration
         try {
+          console.log('Calling getCurrentUserApi...');
+          const userStartTime = Date.now();
           const newUser = await getCurrentUserApi();
+          console.log(`User data received in ${Date.now() - userStartTime}ms:`, newUser);
+          
           set({ user: newUser, isAuthenticated: true });
-          console.log("AuthStore: Registration successful.");
+          console.log("AuthStore: Registration successful and complete.");
           set({ isRegistering: false });
-          return true; // Indicate success
+          return true;
         } catch (userError) {
           console.error("Failed to fetch user data after registration:", userError);
           throw new Error("Registration succeeded but failed to get user profile.");
         }
       } else {
-         throw new Error(response.message || "Registration failed: Invalid response from server.");
+        console.error('Registration failed - success or token missing:', response);
+        throw new Error(response.message || "Registration failed: Invalid response from server.");
       }
     } catch (error: any) {
       console.error("AuthStore: Register action failed:", error);
       const errorMessage = error.message || "Registration failed. Please try again.";
-      // Just set the error message and isRegistering state without calling logout
+      console.log('Setting auth error:', errorMessage);
       set({ 
         authError: errorMessage,
         isRegistering: false 
       });
-      // Remove the logout call to keep user on the registration screen
-      // await get().logout(); <- This line is removed
-      return false; // Indicate failure
+      return false;
     }
   },
 

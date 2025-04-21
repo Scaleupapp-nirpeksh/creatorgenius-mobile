@@ -7,22 +7,18 @@ import { useAuthStore } from '../store/authStore';
 const AUTH_TOKEN_KEY = 'creatorgenius_authToken'; // Make sure this matches what's in authStore.ts
 
 // Define backend API base URL with platform-specific handling
-let API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+let API_BASE_URL = 'http://creator-genius-env-2.eba-8xmj6etz.ap-south-1.elasticbeanstalk.com/api';
 
-if (!API_BASE_URL) {
-  // Production fallback if env variable not set
-  API_BASE_URL = 'https://creator-genius-env-2.eba-8xmj6etz.ap-south-1.elasticbeanstalk.com/api';
-  
-  // Development fallbacks
-  if (__DEV__) {
-    if (Platform.OS === 'android') {
-      API_BASE_URL = 'http://10.0.2.2:5001/api';
-    } else if (Platform.OS === 'ios') {
-      API_BASE_URL = 'http://192.168.68.109:5001/api';
-    }
+/*
+// Use different URLs for development environments
+if (__DEV__) {
+  if (Platform.OS === 'android') {
+    API_BASE_URL = 'http://10.0.2.2:5001/api';
+  } else if (Platform.OS === 'ios') {
+    API_BASE_URL = 'http://192.168.68.109:5001/api';
   }
 }
-
+*/
 console.log(`API Base URL: ${API_BASE_URL}`);
 
 // --- Create Axios Instance ---
@@ -34,42 +30,76 @@ const apiClient = axios.create({
   timeout: 30000, // 30 second timeout
 });
 
-// --- Request Interceptor (Adds Token) ---
+// --- Enhanced Request Interceptor ---
 apiClient.interceptors.request.use(
   async (config) => {
     try {
+      console.log(`🚀 REQUEST: ${config.method?.toUpperCase()} ${config.url}`, {
+        headers: config.headers,
+        params: config.params,
+        data: config.data ? JSON.stringify(config.data).substring(0, 500) : null
+      });
+      
       const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('Token attached to request');
+      } else {
+        console.log('No token available for request');
       }
+      
       return config;
-    } catch (error) { return config; }
+    } catch (error) {
+      console.error('Error in request interceptor:', error);
+      return config;
+    }
   },
-  (error) => { return Promise.reject(error); }
+  (error) => {
+    console.error('Request interceptor error:', error);
+    return Promise.reject(error);
+  }
 );
 
-// --- Response Interceptor (Handles 401 Logout) ---
+// --- Enhanced Response Interceptor ---
 apiClient.interceptors.response.use(
-  (response) => response, // Simply return successful responses
+  (response) => {
+    console.log(`✅ RESPONSE: ${response.status} ${response.config.url}`, {
+      data: response.data ? JSON.stringify(response.data).substring(0, 500) : null
+    });
+    return response;
+  },
   async (error) => {
+    // Log detailed error information
+    console.error(`❌ ERROR:`, {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status || 'No response',
+      statusText: error.response?.statusText,
+      message: error.message,
+      data: error.response?.data ? JSON.stringify(error.response.data).substring(0, 500) : null,
+      timeout: error.code === 'ECONNABORTED' ? 'Request timed out' : null
+    });
+    
+    // Handle 401 errors as before
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest?._retry) {
       console.warn('Received 401 Unauthorized - Logging out via interceptor.');
       if (originalRequest) originalRequest._retry = true;
       try {
-        // Use getState for actions outside component context
         await useAuthStore.getState().logout();
         console.log('Auto-Logout successful.');
       } catch (logoutError) {
         console.error('Error during auto-logout:', logoutError);
       }
     }
+    
     // Return a structured error for consistent handling in catch blocks
     return Promise.reject(error.response?.data || {
-        success: false,
-        message: error.message || 'Network error or unexpected issue occurred.',
-        isNetworkError: !error.response,
-        status: error.response?.status
+      success: false,
+      message: error.message || 'Network error or unexpected issue occurred.',
+      isNetworkError: !error.response,
+      status: error.response?.status,
+      isTimeout: error.code === 'ECONNABORTED'
     });
   }
 );

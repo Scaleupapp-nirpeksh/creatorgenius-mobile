@@ -31,7 +31,8 @@
     "react-native-shared-element": "^0.8.9",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "^13.13.5",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.3",
+    "expo-build-properties": "~0.13.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
