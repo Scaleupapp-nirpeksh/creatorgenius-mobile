@@ -1,10 +1,10 @@
 // src/components/navigation/CustomTabBar.tsx
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Text, useTheme } from "react-native-paper";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
 // Tab configuration with icons
 type TabConfig = {
@@ -12,78 +12,86 @@ type TabConfig = {
     activeIcon: string;
     inactiveIcon: string;
     label: string;
-  }
+  };
 };
 
 const TAB_CONFIG: TabConfig = {
   Dashboard: {
-    activeIcon: 'view-dashboard',
-    inactiveIcon: 'view-dashboard-outline',
-    label: 'Home'
+    activeIcon: "view-dashboard",
+    inactiveIcon: "view-dashboard-outline",
+    label: "Home",
   },
   Generate: {
-    activeIcon: 'lightbulb-on',
-    inactiveIcon: 'lightbulb-on-outline',
-    label: 'AI Ideas'
+    activeIcon: "lightbulb-on",
+    inactiveIcon: "lightbulb-on-outline",
+    label: "AI Ideas",
   },
   SavedItems: {
-    activeIcon: 'bookmark-multiple',
-    inactiveIcon: 'bookmark-multiple-outline',
-    label: 'Saved'
+    activeIcon: "bookmark-multiple",
+    inactiveIcon: "bookmark-multiple-outline",
+    label: "Saved",
   },
   Calendar: {
-    activeIcon: 'calendar-month',
-    inactiveIcon: 'calendar-month-outline',
-    label: 'Calendar'
+    activeIcon: "calendar-month",
+    inactiveIcon: "calendar-month-outline",
+    label: "Calendar",
   },
   Trends: {
-    activeIcon: 'trending-up',
-    inactiveIcon: 'trending-up',
-    label: 'Trends'
+    activeIcon: "trending-up",
+    inactiveIcon: "trending-up",
+    label: "Trends",
   },
   SEO: {
-    activeIcon: 'magnify',
-    inactiveIcon: 'magnify',
-    label: 'SEO'
+    activeIcon: "magnify",
+    inactiveIcon: "magnify",
+    label: "SEO",
   },
   Scripts: {
-    activeIcon: 'script-text',
-    inactiveIcon: 'script-text-outline',
-    label: 'Scripts'
-  }
+    activeIcon: "script-text",
+    inactiveIcon: "script-text-outline",
+    label: "Scripts",
+  },
 };
 
 // Use BottomTabBarProps from React Navigation
-const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+const CustomTabBar = ({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  
-  // Filter out hidden tabs
+  console.log(state.routes);
+  const excludedRoutes = ["AccountSettings", "Feedback"];
+
   const visibleRoutes = state.routes.filter(
-    route => route.name !== 'AccountSettings'
+    (route) => !excludedRoutes.includes(route.name)
   );
-  
+
   return (
-    <View style={[
-      styles.container, 
-      { 
-        backgroundColor: theme.colors.elevation.level2,
-        paddingBottom: insets.bottom || 8,
-        borderTopColor: theme.colors.outlineVariant
-      }
-    ]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.elevation.level2,
+          paddingBottom: insets.bottom || 8,
+          borderTopColor: theme.colors.outlineVariant,
+        },
+      ]}
+    >
       {visibleRoutes.map((route, index) => {
         const { options } = descriptors[route.key];
         const config = TAB_CONFIG[route.name];
         const label = config?.label || route.name;
-        const isFocused = state.index === state.routes.findIndex(r => r.key === route.key);
-        
+        const isFocused =
+          state.index === state.routes.findIndex((r) => r.key === route.key);
+
         // Get the appropriate icon name
         const iconName = isFocused ? config?.activeIcon : config?.inactiveIcon;
-        
+
         const onPress = () => {
           const event = navigation.emit({
-            type: 'tabPress',
+            type: "tabPress",
             target: route.key,
             canPreventDefault: true,
           });
@@ -103,29 +111,37 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
             onPress={onPress}
             style={styles.tabButton}
           >
-            <View style={[
-              styles.tabContent,
-              isFocused && { 
-                backgroundColor: theme.colors.primaryContainer,
-                borderRadius: 16 
-              }
-            ]}>
+            <View
+              style={[
+                styles.tabContent,
+                isFocused && {
+                  backgroundColor: theme.colors.primaryContainer,
+                  borderRadius: 16,
+                },
+              ]}
+            >
               {iconName && (
                 <MaterialCommunityIcons
                   name={iconName}
                   size={22}
-                  color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant}
+                  color={
+                    isFocused
+                      ? theme.colors.primary
+                      : theme.colors.onSurfaceVariant
+                  }
                   style={styles.icon}
                 />
               )}
-              
-              <Text 
+
+              <Text
                 style={[
                   styles.tabLabel,
-                  { 
-                    color: isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant,
-                    fontWeight: isFocused ? '600' : '400',
-                  }
+                  {
+                    color: isFocused
+                      ? theme.colors.primary
+                      : theme.colors.onSurfaceVariant,
+                    fontWeight: isFocused ? "600" : "400",
+                  },
                 ]}
                 numberOfLines={1}
               >
@@ -141,30 +157,30 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderTopWidth: 1,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     height: 68, // Increased height to accommodate icons better
-    width: '100%', // Ensure full width
+    width: "100%", // Ensure full width
   },
   tabButton: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 2, // Reduce horizontal padding to fit all tabs
     paddingTop: 8, // Add padding to the top to prevent icons from being cut
   },
   tabContent: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 6,
     paddingHorizontal: 4,
-    width: '100%', // Full width of the tab button
+    width: "100%", // Full width of the tab button
     height: 44, // Reduced height of tab content to fit better
   },
   icon: {
@@ -173,8 +189,8 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 10,
     marginTop: 1, // Reduced from 2 to bring label closer to icon
-    textAlign: 'center',
-  }
+    textAlign: "center",
+  },
 });
 
 export default CustomTabBar;

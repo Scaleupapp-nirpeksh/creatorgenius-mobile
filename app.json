@@ -16,23 +16,20 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/your-project-id"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.creatorgenius",
+      "bundleIdentifier": "com.scaleup.creatorgenius",
       "buildNumber": "1",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true,
           "NSAllowsLocalNetworking": true
         },
-        "UIBackgroundModes": [
-          "fetch"
-        ]
+        "UIBackgroundModes": ["fetch"]
       }
     },
+
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -40,9 +37,7 @@
       },
       "package": "com.yourcompany.creatorgenius",
       "versionCode": 1,
-      "permissions": [
-        "INTERNET"
-      ]
+      "permissions": ["INTERNET"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
