@@ -2,6 +2,7 @@
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
+  PoliciesScreen:undefined;
 };
   
 export type AppTabParamList = {

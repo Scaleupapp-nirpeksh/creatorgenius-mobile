@@ -1,19 +1,26 @@
 // src/screens/auth/RegisterScreen.tsx
-import React from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, Button, TextInput, HelperText, useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useForm, Controller } from 'react-hook-form';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types';
-import { useAuthStore } from '../../store/authStore';
-import { RegisterUserData } from '../../services/apiClient';
+import React from "react";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  Text,
+  Button,
+  TextInput,
+  HelperText,
+  useTheme,
+  Checkbox,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useForm, Controller } from "react-hook-form";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "../../navigation/types";
+import { useAuthStore } from "../../store/authStore";
+import { RegisterUserData } from "../../services/apiClient";
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
+type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
 
 export default function RegisterScreen({ navigation }: Props) {
   const theme = useTheme();
-  
+
   // Select needed state and actions from the auth store
   const register = useAuthStore((state) => state.register);
   const isRegistering = useAuthStore((state) => state.isRegistering);
@@ -21,41 +28,52 @@ export default function RegisterScreen({ navigation }: Props) {
   const setAuthError = useAuthStore((state) => state.setAuthError);
 
   // Setup React Hook Form
-  const { control, handleSubmit, formState: { errors } } = useForm<RegisterUserData>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterUserData>({
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
+      name: "",
+      email: "",
+      password: "",
+      check: false,
     },
   });
 
   // Handle form submission
   const onSubmit = async (data: RegisterUserData) => {
-    console.log('Attempting registration with:', data.email);
+    console.log("Attempting registration with:", data.email);
     const success = await register(data);
     if (success) {
-      console.log('Registration successful based on action return.');
+      console.log("Registration successful based on action return.");
       // Navigation happens automatically based on isAuthenticated state
     } else {
-      console.log('Registration failed based on action return.');
+      console.log("Registration failed based on action return.");
     }
   };
 
   // Clear API error when user starts typing again
-  const handleInputChange = (onChange: (text: string) => void) => (text: string) => {
-    if (authError) {
-      setAuthError(null);
-    }
-    onChange(text);
-  };
+  const handleInputChange =
+    (onChange: (text: string) => void) => (text: string) => {
+      if (authError) {
+        setAuthError(null);
+      }
+      onChange(text);
+    };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
-        <Text variant="displaySmall" style={[styles.title, { color: theme.colors.primary }]}>
+        <Text
+          variant="displaySmall"
+          style={[styles.title, { color: theme.colors.primary }]}
+        >
           CreatorGenius AI
         </Text>
         <Text variant="headlineSmall" style={styles.subtitle}>
@@ -67,7 +85,7 @@ export default function RegisterScreen({ navigation }: Props) {
           control={control}
           name="name"
           rules={{
-            required: 'Name is required',
+            required: "Name is required",
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.inputContainer}>
@@ -96,10 +114,10 @@ export default function RegisterScreen({ navigation }: Props) {
           control={control}
           name="email"
           rules={{
-            required: 'Email is required',
+            required: "Email is required",
             pattern: {
               value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,4})+$/,
-              message: 'Enter a valid email address',
+              message: "Enter a valid email address",
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
@@ -130,8 +148,11 @@ export default function RegisterScreen({ navigation }: Props) {
           control={control}
           name="password"
           rules={{
-            required: 'Password is required',
-            minLength: { value: 8, message: 'Password must be at least 8 characters' },
+            required: "Password is required",
+            minLength: {
+              value: 8,
+              message: "Password must be at least 8 characters",
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.inputContainer}>
@@ -156,13 +177,45 @@ export default function RegisterScreen({ navigation }: Props) {
         />
 
         {/* API Error Message */}
-        <HelperText
-          type="error"
-          visible={!!authError}
-          style={styles.apiError}
-        >
+        <HelperText type="error" visible={!!authError} style={styles.apiError}>
           {authError}
         </HelperText>
+
+        <Controller
+          control={control}
+          name="check"
+          rules={{ required: "You must agree to the terms and conditions" }}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Checkbox
+                status={value ? "checked" : "unchecked"}
+                onPress={() => onChange(!value)}
+              />
+              <Text
+                variant="labelSmall"
+                style={{ color: "black" }}
+                onPress={() => navigation.navigate("PoliciesScreen")}
+              >
+                I agree to{" "}
+                <Text variant="labelSmall" style={{ color: "blue" }}>
+                  Terms of Service and Privacy Policy
+                </Text>
+              </Text>
+
+              {error && (
+                <HelperText type="error" visible={!!error}>
+                  {error.message}
+                </HelperText>
+              )}
+            </View>
+          )}
+        />
 
         {/* Register Button */}
         <Button
@@ -174,7 +227,7 @@ export default function RegisterScreen({ navigation }: Props) {
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
         >
-          {isRegistering ? 'Creating Account...' : 'Sign Up'}
+          {isRegistering ? "Creating Account..." : "Sign Up"}
         </Button>
 
         {/* Navigate to Login */}
@@ -182,12 +235,12 @@ export default function RegisterScreen({ navigation }: Props) {
           mode="text"
           onPress={() => {
             console.log("Navigate to Login button pressed");
-            navigation.navigate('Login');
+            navigation.navigate("Login");
           }}
           disabled={isRegistering}
           style={styles.subtleButton}
         >
-          {'Already have an account? Log In'}
+          {"Already have an account? Log In"}
         </Button>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -201,18 +254,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 24,
   },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 8,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subtitle: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   inputContainer: {
     marginBottom: 12,
@@ -225,14 +278,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   buttonLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   subtleButton: {
     marginTop: 16,
   },
   apiError: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 14,
     marginTop: 8,
   },

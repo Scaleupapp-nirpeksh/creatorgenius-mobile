@@ -138,7 +138,7 @@ export interface User {
   [key: string]: any; // Allow other user fields
 }
 export interface LoginCredentials { email: string; password: string; }
-export interface RegisterUserData { name: string; email: string; password: string; }
+export interface RegisterUserData { name: string; email: string; password: string; check:boolean }
 
 // --- Ideas ---
 export interface Idea {

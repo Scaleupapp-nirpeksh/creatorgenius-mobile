@@ -1,15 +1,21 @@
 // src/screens/auth/LoginScreen.tsx
-import React from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Text, Button, TextInput, HelperText, useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useForm, Controller } from 'react-hook-form';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types'; // Adjust path if needed
-import { useAuthStore } from '../../store/authStore';
-import { LoginCredentials } from '../../services/apiClient';
+import React from "react";
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import {
+  Text,
+  Button,
+  TextInput,
+  HelperText,
+  useTheme,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useForm, Controller } from "react-hook-form";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "../../navigation/types"; // Adjust path if needed
+import { useAuthStore } from "../../store/authStore";
+import { LoginCredentials } from "../../services/apiClient";
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
+type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 export default function LoginScreen({ navigation }: Props) {
   const theme = useTheme();
@@ -22,41 +28,51 @@ export default function LoginScreen({ navigation }: Props) {
   const setAuthError = useAuthStore((state) => state.setAuthError);
 
   // Setup React Hook Form
-  const { control, handleSubmit, formState: { errors } } = useForm<LoginCredentials>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginCredentials>({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
   // Handle form submission
   const onSubmit = async (data: LoginCredentials) => {
-    console.log('Attempting login with:', data.email);
+    console.log("Attempting login with:", data.email);
     const success = await login(data);
     if (success) {
-      console.log('Login seemed successful based on action return.');
+      console.log("Login seemed successful based on action return.");
       // Navigation can happen automatically based on isAuthenticated state changes.
     } else {
-      console.log('Login failed based on action return.');
+      console.log("Login failed based on action return.");
     }
   };
 
   // Clear API error when user starts typing again
-  const handleInputChange = (onChange: (text: string) => void) => (text: string) => {
-    if (authError) {
-      setAuthError(null);
-    }
-    onChange(text);
-  };
+  const handleInputChange =
+    (onChange: (text: string) => void) => (text: string) => {
+      if (authError) {
+        setAuthError(null);
+      }
+      onChange(text);
+    };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.content}
       >
         {/* Logo Component can be placed here later */}
-        <Text variant="displaySmall" style={[styles.title, { color: theme.colors.primary }]}>
+        <Text
+          variant="displaySmall"
+          style={[styles.title, { color: theme.colors.primary }]}
+        >
           CreatorGenius AI
         </Text>
         <Text variant="headlineSmall" style={styles.subtitle}>
@@ -68,10 +84,10 @@ export default function LoginScreen({ navigation }: Props) {
           control={control}
           name="email"
           rules={{
-            required: 'Email is required',
+            required: "Email is required",
             pattern: {
               value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,4})+$/,
-              message: 'Enter a valid email address',
+              message: "Enter a valid email address",
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
@@ -102,8 +118,11 @@ export default function LoginScreen({ navigation }: Props) {
           control={control}
           name="password"
           rules={{
-            required: 'Password is required',
-            minLength: { value: 8, message: 'Password must be at least 8 characters' },
+            required: "Password is required",
+            minLength: {
+              value: 8,
+              message: "Password must be at least 8 characters",
+            },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <View style={styles.inputContainer}>
@@ -146,26 +165,32 @@ export default function LoginScreen({ navigation }: Props) {
           contentStyle={styles.buttonContent}
           labelStyle={styles.buttonLabel}
         >
-          {isLoggingIn ? 'Logging In...' : 'Log In'}
+          {isLoggingIn ? "Logging In..." : "Log In"}
         </Button>
 
         {/* Navigate to Register */}
         <Button
-            mode="text"
-            onPress={() => {
-                console.log("Navigate to Register button pressed");
-                console.log("Auth state before navigation:", useAuthStore.getState());
-                navigation.navigate('Register');
-                // Check again after to see if something changed
-                setTimeout(() => {
-                  console.log("Auth state after navigation:", useAuthStore.getState());
-                }, 100);
-            }}
-            disabled={isLoggingIn}
-            style={styles.subtleButton}
-          >
-            {"Don't have an account? Sign Up"}
-          </Button>
+          mode="text"
+          onPress={() => {
+            console.log("Navigate to Register button pressed");
+            console.log(
+              "Auth state before navigation:",
+              useAuthStore.getState()
+            );
+            navigation.navigate("Register");
+            // Check again after to see if something changed
+            setTimeout(() => {
+              console.log(
+                "Auth state after navigation:",
+                useAuthStore.getState()
+              );
+            }, 100);
+          }}
+          disabled={isLoggingIn}
+          style={styles.subtleButton}
+        >
+          {"Don't have an account? Sign Up"}
+        </Button>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -178,18 +203,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 24,
   },
   title: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 8,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subtitle: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 32,
-    color: '#6B7280',
+    color: "#6B7280",
   },
   inputContainer: {
     marginBottom: 12,
@@ -202,14 +227,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   buttonLabel: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 16,
   },
   subtleButton: {
     marginTop: 16,
   },
   apiError: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 14,
     marginTop: 8,
   },
